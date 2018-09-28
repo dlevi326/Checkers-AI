@@ -3,15 +3,15 @@
 
 #include "Game.h"
 #include "Gameboard.h"
-#include "Square.h"
 
 using namespace std;
 
 int main(){
 
 	Game g;
+	Gameboard game;
 
-	g.printBoard();
+	g.executeGame(game);
 
 
 

@@ -4,59 +4,29 @@
 #include <iostream>
 #include <vector>
 #include "Gameboard.h"
-#include "Square.h"
 
 using namespace std;
 
 class Game{
 public:
 
-	vector<Gameboard> oldBoards;
-	Gameboard currBoard;
 
-	//vector<pair<int,int> > getValidMoves(Gameboard g, Square s); // Gets all valid moves of a piece
+	vector<Gameboard> oldBoards; // Vector of all old boards
+	Gameboard currBoard; // Current gameboard
+	bool endGame; // Did game end
 
-	Game();
+	void humanTurn(int);
+	void compTurn();
+
+	vector<vector<pair<int,int> > > getValidMoves(Gameboard, Gameboard::Square); // Gets all valid moves of a piece
+
+	Game(); // Init
 
 	void printBoard();
 
+	void executeGame(Gameboard,int=0,int=0); // Starts the game
+
 };
-
-/*vector<pair<int,int> > Game::getValidMoves(Gameboard g, Square s){
-	vector<pair<int,int> > moves;
-	pair<int,int> currSquare = s.coords;
-
-	if(currSquare.first-1>=0){
-		if(currSquare.second-1>=0){
-			if(!g.boardTrue[currSquare.first-1][currSquare.second-1]){
-				moves.push_back(make_pair(currSquare.first-1,currSquare.second-1));
-			}
-		}
-	}
-
-
-
-	return moves;
-}*/
-
-/*Game::Game(){
-
-}
-
-void Game::printBoard(){
-	for(int i=0;i<currBoard.board.size();i++){
-		for(int j=0;j<currBoard.board.size();j++){
-			cout<<currBoard.board[i][j].type<<" ";
-		}
-		cout<<endl;
-	}
-}*/
-
-
-
-
-
-
 
 
 
