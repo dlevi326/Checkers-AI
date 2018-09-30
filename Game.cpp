@@ -22,7 +22,7 @@ vector<vector<pair<int,int> > > Game::getValidMoves(Gameboard g, Gameboard::Squa
 
 	int ind = -100;
 	if(s.isKing){
-
+		
 		if(s.type==g.player1GameKing){
 			ind = -1;
 			opposingPlayerKing = g.player2GameKing;
@@ -82,6 +82,7 @@ vector<vector<pair<int,int> > > Game::getValidMoves(Gameboard g, Gameboard::Squa
 
 	}
 	else{
+		
 		if(s.type==g.player1GameReg){
 			ind = -1;
 		}
@@ -117,33 +118,6 @@ vector<vector<pair<int,int> > > Game::getValidMoves(Gameboard g, Gameboard::Squa
 	}
 
 
-	/*if(s.isKing){
-		if(i+1<g.board.size() && i-1>=0 && j+1<g.board[0].size() && j-1>=0){
-			moves.push_back(getValidMoves(g, g.board[i+1][j-1]));
-			moves.push_back(getValidMoves(g, g.board[i+1][j+1]));
-			moves.push_back(getValidMoves(g, g.board[i-1][j-1]));
-			moves.push_back(getValidMoves(g, g.board[i-1][j+1]));
-		}
-	}
-	else{
-		if(i+1<g.board.size() && i-1>=0 && j+1<g.board[0].size() && j-1>=0){
-			moves.push_back(getValidMoves(g, g.board[i-1][j-1]));
-			moves.push_back(getValidMoves(g, g.board[i-1][j+1]));
-		}
-	}*/
-
-	/*pair<int,int> currSquare = s.coords;
-
-	if(currSquare.first-1>=0){
-		if(currSquare.second-1>=0){
-			if(!g.boardTrue[currSquare.first-1][currSquare.second-1]){
-				moves.push_back(make_pair(currSquare.first-1,currSquare.second-1));
-			}
-		}
-	}*/
-
-
-
 	return moves;
 }
 
@@ -173,6 +147,7 @@ void Game::printBoard(){
 void Game::humanTurn(int turn){
 	// Turn 1: player1
 	// Turn 2: player2
+	//cout<<"Top left: "<<currBoard.board[0][0].type<<endl;
 
 	string targets[2];
 
@@ -188,18 +163,38 @@ void Game::humanTurn(int turn){
 	vector<vector<vector<pair<int,int> > > > allMoves;
 	vector<vector<pair<int,int> > > temp;
 
-	for(int i=0;i<currBoard.board.size();i++){
+	bool isJumpPossible = false;
+
+	/*for(int i=0;i<currBoard.board.size();i++){
 		for(int j=0;j<currBoard.board.size();j++){
 			
 			if(currBoard.board[i][j].type==targets[0] || currBoard.board[i][j].type==targets[1]){
-				//cout<<"Getting valid moves for spot: "<<currBoard.board[i][j].coords.first<<" "<<currBoard.board[i][j].coords.second<<endl;
+				
 				temp = (getValidMoves(currBoard,currBoard.board[i][j]));
 				allMoves.push_back(temp);
-				//cout<<"Received: "<<temp[0].first<<" "<<temp[0].second<<endl;
+				
 			}
 			
 			
 			temp.clear();
+		}
+	}*/
+
+
+	if(!isJumpPossible){
+		for(int i=0;i<currBoard.board.size();i++){
+			for(int j=0;j<currBoard.board.size();j++){
+				
+				if(currBoard.board[i][j].type==targets[0] || currBoard.board[i][j].type==targets[1]){
+					//cout<<"Getting valid moves for spot: "<<currBoard.board[i][j].coords.first<<" "<<currBoard.board[i][j].coords.second<<endl;
+					temp = (getValidMoves(currBoard,currBoard.board[i][j]));
+					allMoves.push_back(temp);
+					//cout<<"Received: "<<temp[0].first<<" "<<temp[0].second<<endl;
+				}
+				
+				
+				temp.clear();
+			}
 		}
 	}
 
@@ -228,6 +223,7 @@ void Game::executeGame(Gameboard g,int whoseTurn, int gameType){
 
 // whoseTurn = 1: Human
 // whoseTurn = 0: Comp 
+	currBoard = g;
 	int num=0;
 	int turn;
 	(whoseTurn==0) ? turn = 1 : turn = -1;

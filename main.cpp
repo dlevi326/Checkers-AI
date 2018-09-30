@@ -11,6 +11,8 @@ int main(){
 	Game g;
 	Gameboard game;
 
+	game.load_board(game,"pracBoards/board1.txt");
+
 	g.executeGame(game);
 
 

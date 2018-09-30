@@ -38,6 +38,8 @@ public:
 
 	Gameboard(int size=8);
 
+	void load_board(Gameboard& ,string);
+
 };
 
 
