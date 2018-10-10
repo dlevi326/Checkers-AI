@@ -2,6 +2,8 @@
 
 #include <iostream>
 #include <vector>
+#include <cctype>
+#include <cmath>
 #include "Gameboard.h"
 #include "Game.h"
 
@@ -121,6 +123,38 @@ vector<vector<pair<int,int> > > Game::getValidMoves(Gameboard g, Gameboard::Squa
 	return moves;
 }
 
+vector<vector<pair<int,int> > > Game::getValidMovesJump(Gameboard g, Gameboard::Square s){
+	vector<vector<pair<int,int> > > moves;
+	vector<pair<int,int> > tempMoves;
+
+	pair<int,int> temp = make_pair(-1,-1);
+	tempMoves.push_back(temp);
+	moves.push_back(tempMoves);
+	return moves;
+
+}
+
+int inputMove(vector<vector<pair<int,int> > > allMoves){
+	int moveNum = -1;
+	cin>>moveNum;
+	
+	if(!cin){
+		cin.clear();
+		cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+		cout<<"Invalid move number, please choose again: ";
+		//cin>>moveNum;
+		return -1;
+	}
+	if(moveNum>=allMoves.size() || moveNum<0){
+		cout<<"Invalid number, please choose again: ";
+		return -1;
+	}
+	else{
+		return moveNum;
+	}
+	
+
+}
 
 
 Game::Game(){
@@ -144,6 +178,47 @@ void Game::printBoard(){
 	cout<<endl;
 }
 
+bool isJump(pair<int,int> m1, pair<int,int> m2){
+	if(abs(m1.first-m2.first)==2){
+		return true;
+	}
+	return false;
+}
+
+vector<vector<Gameboard::Square> > Game::makeMove(Gameboard g, vector<pair<int,int> > move){
+
+	string currPiece;
+	bool isKing;
+	for(int i=0;i<move.size()-1;i++){
+		if(!isJump(move[i],move[i+1])){
+			currPiece = g.board[move[i].first][move[i].second].type;
+			isKing = g.board[move[i].first][move[i].second].isKing;
+
+			g.board[move[i].first][move[i].second].type = g.blankGame;
+			g.board[move[i].first][move[i].second].isKing = false;
+
+			g.board[move[i+1].first][move[i+1].second].type = currPiece;
+			g.board[move[i+1].first][move[i+1].second].isKing = isKing;
+		}
+		else{
+			int xJump = (move[i].first+move[i+1].first)/2;
+			int yJump = (move[i].second+move[i+1].second)/2;
+
+			currPiece = g.board[move[i].first][move[i].second].type;
+			isKing = g.board[move[i].first][move[i].second].isKing;
+
+			g.board[xJump][yJump].type = g.blankGame;
+			g.board[xJump][yJump].isKing = false;
+
+			g.board[move[i+1].first][move[i+1].second].type = currPiece;
+			g.board[move[i+1].first][move[i+1].second].isKing = isKing;
+		}
+
+	}
+
+	return g.board;
+}
+
 void Game::humanTurn(int turn){
 	// Turn 1: player1
 	// Turn 2: player2
@@ -160,7 +235,7 @@ void Game::humanTurn(int turn){
 		targets[1] = currBoard.player2GameKing;
 	}
 
-	vector<vector<vector<pair<int,int> > > > allMoves;
+	vector<vector<pair<int,int> > > allMoves;
 	vector<vector<pair<int,int> > > temp;
 
 	bool isJumpPossible = false;
@@ -170,12 +245,13 @@ void Game::humanTurn(int turn){
 			
 			if(currBoard.board[i][j].type==targets[0] || currBoard.board[i][j].type==targets[1]){
 				
-				temp = (getValidMoves(currBoard,currBoard.board[i][j]));
+				temp = (getValidMovesJump(currBoard,currBoard.board[i][j]));
+				if(temp.size()>0){
+					isJumpPossible = true;
+				}
 				allMoves.push_back(temp);
 				
 			}
-			
-			
 			temp.clear();
 		}
 	}*/
@@ -188,7 +264,7 @@ void Game::humanTurn(int turn){
 				if(currBoard.board[i][j].type==targets[0] || currBoard.board[i][j].type==targets[1]){
 					//cout<<"Getting valid moves for spot: "<<currBoard.board[i][j].coords.first<<" "<<currBoard.board[i][j].coords.second<<endl;
 					temp = (getValidMoves(currBoard,currBoard.board[i][j]));
-					allMoves.push_back(temp);
+					allMoves.insert(allMoves.begin(),temp.begin(),temp.end());
 					//cout<<"Received: "<<temp[0].first<<" "<<temp[0].second<<endl;
 				}
 				
@@ -202,13 +278,31 @@ void Game::humanTurn(int turn){
 	//allMoves.push_back(temp);
 
 	for(int i=0;i<allMoves.size();i++){
+		cout<<i<<"\t";
 		for(int j=0;j<allMoves[i].size();j++){
-			for(int k=0;k<allMoves[i][j].size();k++){
-				cout<<"("<<allMoves[i][j][k].first<<","<<allMoves[i][j][k].second<<") --> ";
-			}
-			cout<<endl;
+			cout<<" ("<<allMoves[i][j].first<<","<<allMoves[i][j].second<<") --> ";
 		}
+		cout<<endl;
 	}
+
+
+	int moveNum = -1;
+	cout<<"Please make a move: ";
+	while(moveNum<0){
+		moveNum = inputMove(allMoves);
+	}
+
+	cout<<"You chose: "<<moveNum;
+	for(int i=0;i<allMoves[moveNum].size();i++){
+		cout<<" ("<<allMoves[moveNum][i].first<<","<<allMoves[moveNum][i].second<<") --> ";
+	}
+	cout<<endl;
+
+	cout<<"Making move...."<<endl;
+
+	currBoard.board = makeMove(currBoard, allMoves[moveNum]);
+
+
 
 }
 
