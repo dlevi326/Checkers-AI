@@ -20,13 +20,13 @@ public:
 
 	vector<vector<pair<int,int> > > getValidMoves(Gameboard, Gameboard::Square); // Gets all valid moves of a piece
 
-	vector<vector<pair<int,int> > > getValidMovesJump(Gameboard, Gameboard::Square);
+	vector<vector<pair<int,int> > > getValidMovesJump(Gameboard, Gameboard::Square, vector<pair<int,int> >&);
 
 	Game(); // Init
 
-	void printBoard();
+	void printBoard(Gameboard);
 
-	void executeGame(Gameboard,int=0,int=0); // Starts the game
+	void executeGame(Gameboard,int=0,int=2); // Starts the game
 
 	vector<vector<Gameboard::Square> > makeMove(Gameboard, vector<pair<int,int> >);
 

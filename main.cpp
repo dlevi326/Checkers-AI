@@ -11,7 +11,7 @@ int main(){
 	Game g;
 	Gameboard game;
 
-	game.load_board(game,"pracBoards/board1.txt");
+	game.load_board(game,"pracBoards/board2.txt");
 
 	g.executeGame(game);
 
