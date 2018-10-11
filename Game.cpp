@@ -452,6 +452,7 @@ void Game::humanTurn(int turn){
 	cout<<"Making move...."<<endl;
 
 	currBoard.board = makeMove(currBoard, allMoves[moveNum]);
+	printBoard(currBoard);
 
 
 
@@ -473,39 +474,39 @@ void Game::executeGame(Gameboard g,int whoseTurn, int gameType){
 	int turn;
 	(whoseTurn==0) ? turn = 1 : turn = -1;
 
-
+	printBoard(g);
 	while(num<100){
-		printBoard(g);
+		//printBoard(g);
 
 		switch(gameType){
 			case 0:
 				if(turn>0){
 					humanTurn(turn);
-					printBoard(g);
+					//printBoard(g);
 				}
 				else{
 					compTurn();
-					printBoard(g);
+					//printBoard(g);
 				}
 				turn*=-1;
 			case 1:
 				if(turn>0){
 					compTurn();
-					printBoard(g);
+					//printBoard(g);
 				}
 				else{
 					compTurn();
-					printBoard(g);
+					//printBoard(g);
 				}
 				turn*=-1;
 			case 2:
 				if(turn>0){
 					humanTurn(turn);
-					printBoard(g);
+					//printBoard(g);
 				}
 				else{
 					humanTurn(turn);
-					printBoard(g);
+					//printBoard(g);
 				}
 				turn*=-1;
 		}
