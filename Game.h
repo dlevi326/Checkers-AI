@@ -16,7 +16,7 @@ public:
 	bool endGame; // Did game end
 
 	void humanTurn(int);
-	void compTurn();
+	void compTurn(int);
 
 	vector<vector<pair<int,int> > > getValidMoves(Gameboard, Gameboard::Square); // Gets all valid moves of a piece
 

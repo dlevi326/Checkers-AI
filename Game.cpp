@@ -4,6 +4,7 @@
 #include <vector>
 #include <cctype>
 #include <cmath>
+#include <cstdlib>
 #include "Gameboard.h"
 #include "Game.h"
 
@@ -510,6 +511,7 @@ void Game::humanTurn(int turn){
 
 	int moveNum = -1;
 	cout<<"Please make a move: ";
+
 	while(moveNum<0){
 		moveNum = inputMove(allMoves);
 	}
@@ -529,7 +531,111 @@ void Game::humanTurn(int turn){
 
 }
 
-void Game::compTurn(){
+void Game::compTurn(int turn){
+
+	// Turn 1: player1
+	// Turn 2: player2
+	//cout<<"Top left: "<<currBoard.board[0][0].type<<endl;
+
+	string targets[2];
+
+	cout<<"Turn: "<<turn<<endl;
+	if(turn==1){
+		targets[0] = currBoard.player1GameReg;
+		targets[1] = currBoard.player1GameKing;
+	} 
+	else{
+		targets[0] = currBoard.player2GameReg;
+		targets[1] = currBoard.player2GameKing;
+	}
+
+	vector<vector<pair<int,int> > > allMoves;
+	vector<vector<pair<int,int> > > temp;
+
+	bool isJumpPossible = false;
+
+	for(int i=0;i<currBoard.board.size();i++){
+		for(int j=0;j<currBoard.board.size();j++){
+			
+			if(currBoard.board[i][j].type==targets[0] || currBoard.board[i][j].type==targets[1]){
+				vector<pair<int,int> > path;
+				
+				temp = (getValidMovesJump(currBoard,currBoard.board[i][j],path));
+				
+
+				if(temp.size()>0){
+					isJumpPossible = true;
+					for(int k=0;k<temp.size();k++){
+						if(temp[k].size()>0){
+							allMoves.push_back(temp[k]);
+						}
+					}	
+				}
+				
+			}
+			temp.clear();
+		}
+	}
+
+
+	if(!isJumpPossible){
+		for(int i=0;i<currBoard.board.size();i++){
+			for(int j=0;j<currBoard.board.size();j++){
+				
+				if(currBoard.board[i][j].type==targets[0] || currBoard.board[i][j].type==targets[1]){
+					
+					temp = (getValidMoves(currBoard,currBoard.board[i][j]));
+					//vector<vector<pair<int,int> > > temp2;
+					for(int k=0;k<temp.size();k++){
+						
+						if(temp[k].size()>1){
+							allMoves.push_back(temp[k]);
+						}
+					}
+
+					
+				}
+				
+				
+				temp.clear();
+			}
+		}
+	}
+
+	//temp = (getValidMoves(currBoard,currBoard.board[1][5]));
+	//allMoves.push_back(temp);
+
+	for(int i=0;i<allMoves.size();i++){
+		cout<<i<<"\t";
+		for(int j=0;j<allMoves[i].size();j++){
+			cout<<" ("<<allMoves[i][j].first<<","<<allMoves[i][j].second<<") --> ";
+		}
+		cout<<endl;
+	}
+
+
+	int moveNum = -1;
+	cout<<"Computer is making a move...";
+	srand(0);
+	while(moveNum<0){
+		//moveNum = inputMove(allMoves);
+		if(allMoves.size()==0){
+			cout<<"COMPUTER LOSES"<<endl;
+			return;
+		}
+		moveNum = (rand()%allMoves.size());
+	}
+
+	cout<<"Computer chose: "<<moveNum;
+	for(int i=0;i<allMoves[moveNum].size();i++){
+		cout<<" ("<<allMoves[moveNum][i].first<<","<<allMoves[moveNum][i].second<<") --> ";
+	}
+	cout<<endl;
+
+	cout<<"Making move...."<<endl;
+
+	currBoard.board = makeMove(currBoard, allMoves[moveNum]);
+	printBoard(currBoard);
 
 }
 
@@ -553,33 +659,30 @@ void Game::executeGame(Gameboard g,int whoseTurn, int gameType){
 			case 0:
 				if(turn>0){
 					humanTurn(turn);
-					//printBoard(g);
 				}
 				else{
-					compTurn();
-					//printBoard(g);
+					compTurn(turn);
 				}
 				turn*=-1;
+				break;
 			case 1:
 				if(turn>0){
-					compTurn();
-					//printBoard(g);
+					compTurn(turn);
 				}
 				else{
-					compTurn();
-					//printBoard(g);
+					compTurn(turn);
 				}
 				turn*=-1;
+				break;
 			case 2:
 				if(turn>0){
 					humanTurn(turn);
-					//printBoard(g);
 				}
 				else{
 					humanTurn(turn);
-					//printBoard(g);
 				}
 				turn*=-1;
+				break;
 		}
 		num++;
 
