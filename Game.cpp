@@ -142,8 +142,8 @@ bool inBoundsNK(Gameboard::Square s,int first, int second){
 
 }
 
-vector<vector<pair<int,int> > > Game::getValidMovesJump(Gameboard g, Gameboard::Square s, vector<pair<int,int> >& currPath){
-	cout<<"GETTING MOVES JUMPS "<<s.coords.first<<" "<<s.coords.second<<endl;
+vector<vector<pair<int,int> > > Game::getValidMovesJump(Gameboard g, Gameboard::Square s, vector<pair<int,int> > currPath){
+	//cout<<"GETTING MOVES JUMPS "<<s.coords.first<<" "<<s.coords.second<<endl;
 
 	int ind;
 	string oppPlayer[2];
@@ -161,17 +161,16 @@ vector<vector<pair<int,int> > > Game::getValidMovesJump(Gameboard g, Gameboard::
 	vector<vector<pair<int,int> > > moves;
 
 	currPath.push_back(make_pair(s.coords.first,s.coords.second));
-	moves.push_back(currPath);
+	//moves.push_back(currPath);
 
 	vector<vector<Gameboard::Square> > newBoard;
 	Gameboard newGameboard;
 
+
 	if(!s.isKing){
 		if(inBoundsNK(s,s.coords.first-(2*ind),s.coords.second-(2*ind))){
-			cout<<"IN BOUNDS"<<endl;
 			if((g.board[s.coords.first-(ind)][s.coords.second-(ind)].type==oppPlayer[0] || g.board[s.coords.first-(ind)][s.coords.second-(ind)].type==oppPlayer[1])
 				&& g.board[s.coords.first-(2*ind)][s.coords.second-(2*ind)].type==g.blankGame){
-				cout<<"POSSIBLE JUMP"<<endl;
 
 				vector<pair<int,int> > makeMoveVect;
 				makeMoveVect.push_back(make_pair(s.coords.first,s.coords.second));
@@ -179,28 +178,59 @@ vector<vector<pair<int,int> > > Game::getValidMovesJump(Gameboard g, Gameboard::
 
 				newBoard = makeMove(g,makeMoveVect);
 				newGameboard.board = newBoard;
-				cout<<"Printing modified board.."<<endl;
+				//cout<<"Printing modified board.."<<endl;
 				//printBoard(newGameboard);
 
 				vector<vector<pair<int,int> > > temp = getValidMovesJump(newGameboard,newGameboard.board[s.coords.first-(2*ind)][s.coords.second-(2*ind)],currPath);
-				moves.insert(moves.begin(),temp.begin(),temp.end());
-				//allMoves.insert(allMoves.begin(),temp2.begin(),temp2.end());
-			}
-			else{
-				cout<<"opposing piece is: "<<g.board[s.coords.first-(2*ind)][s.coords.second-(2*ind)].type<<endl;
-				cout<<"at: "<<s.coords.first-(2*ind)<<" "<<s.coords.second-(2*ind)<<endl;
-				if(g.board[s.coords.first-(2*ind)][s.coords.second-(2*ind)].type==" o "){
-					//printBoard(g);
+				if(temp.size()==0){
+					currPath.push_back(make_pair(s.coords.first-(2*ind),s.coords.second-(2*ind)));
+					moves.push_back(currPath);
 				}
+				//moves.insert(moves.begin(),temp.begin(),temp.end());
+				// Should I add this ^^^^^ ???? check
+
+
+				for(int i=0;i<temp.size();i++){
+					moves.push_back(temp[i]);
+				}
+
+			}
+		}
+		if(inBoundsNK(s,s.coords.first-(2*ind),s.coords.second+(2*ind))){
+			if((g.board[s.coords.first-(ind)][s.coords.second+(ind)].type==oppPlayer[0] || g.board[s.coords.first-(ind)][s.coords.second+(ind)].type==oppPlayer[1])
+				&& g.board[s.coords.first-(2*ind)][s.coords.second+(2*ind)].type==g.blankGame){
+
+				vector<pair<int,int> > makeMoveVect;
+				makeMoveVect.push_back(make_pair(s.coords.first,s.coords.second));
+				makeMoveVect.push_back(make_pair(s.coords.first-(2*ind),s.coords.second+(2*ind)));
+
+				newBoard = makeMove(g,makeMoveVect);
+				newGameboard.board = newBoard;
+				//cout<<"Printing modified board.."<<endl;
+				//printBoard(newGameboard);
+
+				if(moves.size()==1){
+					currPath.pop_back();
+				}
+				
+
+				vector<vector<pair<int,int> > > temp = getValidMovesJump(newGameboard,newGameboard.board[s.coords.first-(2*ind)][s.coords.second+(2*ind)],currPath);
+				//moves.insert(moves.begin(),temp.begin(),temp.end());
+				// Should I add this ^^^^^ ???? check
+
+				if(temp.size()==0){
+					currPath.push_back(make_pair(s.coords.first-(2*ind),s.coords.second+(2*ind)));
+					moves.push_back(currPath);
+				}
+
+				for(int i=0;i<temp.size();i++){
+					moves.push_back(temp[i]);
+				}
+
 			}
 		}
 	}
-
-	cout<<"CURR PATH: "<<endl;
-	for(int i=0;i<currPath.size();i++){
-		cout<<currPath[i].first<<","<<currPath[i].second<<"\t";
-	}
-	cout<<endl;
+	//moves.push_back(currPath);
 
 	return moves;
 
