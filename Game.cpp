@@ -131,15 +131,6 @@ bool inBoundsNK(Gameboard::Square s,int first, int second){
 	}
 	return true;
 
-	/*if(s.type == g.player1GameReg ){
-		if(first>7 || first<0 || second>7 || second<0){
-			return true;
-		}
-	}
-	else{
-
-	}*/
-
 }
 
 vector<vector<pair<int,int> > > Game::getValidMovesJump(Gameboard g, Gameboard::Square s, vector<pair<int,int> > currPath){
@@ -167,7 +158,7 @@ vector<vector<pair<int,int> > > Game::getValidMovesJump(Gameboard g, Gameboard::
 	Gameboard newGameboard;
 
 
-	if(!s.isKing){
+	if(!s.isKing || s.isKing){
 		if(inBoundsNK(s,s.coords.first-(2*ind),s.coords.second-(2*ind))){
 			if((g.board[s.coords.first-(ind)][s.coords.second-(ind)].type==oppPlayer[0] || g.board[s.coords.first-(ind)][s.coords.second-(ind)].type==oppPlayer[1])
 				&& g.board[s.coords.first-(2*ind)][s.coords.second-(2*ind)].type==g.blankGame){
@@ -230,6 +221,76 @@ vector<vector<pair<int,int> > > Game::getValidMovesJump(Gameboard g, Gameboard::
 			}
 		}
 	}
+	if(s.isKing){
+		if(inBoundsNK(s,s.coords.first+(2*ind),s.coords.second-(2*ind))){
+			if((g.board[s.coords.first+(ind)][s.coords.second-(ind)].type==oppPlayer[0] || g.board[s.coords.first+(ind)][s.coords.second-(ind)].type==oppPlayer[1])
+				&& g.board[s.coords.first+(2*ind)][s.coords.second-(2*ind)].type==g.blankGame){
+
+				vector<pair<int,int> > makeMoveVect;
+				makeMoveVect.push_back(make_pair(s.coords.first,s.coords.second));
+				makeMoveVect.push_back(make_pair(s.coords.first+(2*ind),s.coords.second-(2*ind)));
+
+				newBoard = makeMove(g,makeMoveVect);
+				newGameboard.board = newBoard;
+				//cout<<"Printing modified board.."<<endl;
+				//printBoard(newGameboard);
+
+				if(moves.size()==2){
+					currPath.pop_back();
+				}
+				
+
+				vector<vector<pair<int,int> > > temp = getValidMovesJump(newGameboard,newGameboard.board[s.coords.first+(2*ind)][s.coords.second-(2*ind)],currPath);
+				//moves.insert(moves.begin(),temp.begin(),temp.end());
+				// Should I add this ^^^^^ ???? check
+
+				if(temp.size()==0){
+					currPath.push_back(make_pair(s.coords.first+(2*ind),s.coords.second-(2*ind)));
+					moves.push_back(currPath);
+				}
+
+				for(int i=0;i<temp.size();i++){
+					moves.push_back(temp[i]);
+				}
+
+			}
+		}
+		if(inBoundsNK(s,s.coords.first+(2*ind),s.coords.second+(2*ind))){
+			if((g.board[s.coords.first+(ind)][s.coords.second+(ind)].type==oppPlayer[0] || g.board[s.coords.first+(ind)][s.coords.second+(ind)].type==oppPlayer[1])
+				&& g.board[s.coords.first+(2*ind)][s.coords.second+(2*ind)].type==g.blankGame){
+
+				vector<pair<int,int> > makeMoveVect;
+				makeMoveVect.push_back(make_pair(s.coords.first,s.coords.second));
+				makeMoveVect.push_back(make_pair(s.coords.first+(2*ind),s.coords.second+(2*ind)));
+
+				newBoard = makeMove(g,makeMoveVect);
+				newGameboard.board = newBoard;
+				//cout<<"Printing modified board.."<<endl;
+				//printBoard(newGameboard);
+
+				if(moves.size()==3){
+					currPath.pop_back();
+				}
+				
+
+				vector<vector<pair<int,int> > > temp = getValidMovesJump(newGameboard,newGameboard.board[s.coords.first+(2*ind)][s.coords.second+(2*ind)],currPath);
+				//moves.insert(moves.begin(),temp.begin(),temp.end());
+				// Should I add this ^^^^^ ???? check
+
+				if(temp.size()==0){
+					currPath.push_back(make_pair(s.coords.first+(2*ind),s.coords.second+(2*ind)));
+					moves.push_back(currPath);
+				}
+
+				for(int i=0;i<temp.size();i++){
+					moves.push_back(temp[i]);
+				}
+
+			}
+		}
+	}
+
+
 	//moves.push_back(currPath);
 
 	return moves;
@@ -346,8 +407,18 @@ vector<vector<Gameboard::Square> > Game::makeMove(Gameboard g, vector<pair<int,i
 			g.board[xJump][yJump].type = g.blankGame;
 			g.board[xJump][yJump].isKing = false;
 
-			g.board[move[i+1].first][move[i+1].second].type = currPiece;
-			g.board[move[i+1].first][move[i+1].second].isKing = isKing;
+			if(move[i+1].first==kingYcoord && kingYcoord==7){
+				g.board[move[i+1].first][move[i+1].second].isKing = true;
+				g.board[move[i+1].first][move[i+1].second].type = g.player1GameKing;
+			}
+			else if(move[i+1].first==kingYcoord && kingYcoord==0){
+				g.board[move[i+1].first][move[i+1].second].isKing = true;
+				g.board[move[i+1].first][move[i+1].second].type = g.player2GameKing;
+			}
+			else{
+				g.board[move[i+1].first][move[i+1].second].type = currPiece;
+				g.board[move[i+1].first][move[i+1].second].isKing = isKing;
+			}
 			
 		}
 
