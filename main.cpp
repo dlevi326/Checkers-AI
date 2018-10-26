@@ -11,9 +11,11 @@ int main(){
 	Game g;
 	Gameboard game;
 
-	game.load_board(game,"pracBoards/board1.txt");
+	game.load_board(game,"pracBoards/boardWrong2.txt");
 
-	g.executeGame(game,0,0);
+	int gameMode = 1;
+	int turn = 1;
+	g.executeGame(game,turn,gameMode);
 
 
 

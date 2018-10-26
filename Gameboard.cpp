@@ -19,10 +19,10 @@ Gameboard::Gameboard(int size){
 
 
 	blankGame = " - ";
-	player1GameReg = " o ";
-	player2GameReg = " x ";
-	player1GameKing = " O ";
-	player2GameKing = " X ";
+	player1GameReg = " o "; // o
+	player2GameReg = " x "; // x
+	player1GameKing = " 0 "; // O
+	player2GameKing = " Z "; // X
 
 	string blank = blankGame;
 	string player1 = player1GameKing;
