@@ -177,8 +177,10 @@ vector<vector<pair<int,int> > > Game::getValidMovesJump(Gameboard g, Gameboard::
 
 				vector<vector<pair<int,int> > > temp = getValidMovesJump(newGameboard,newGameboard.board[s.coords.first-(2*ind)][s.coords.second-(2*ind)],currPath);
 				if(temp.size()==0){
+					// Dont think this ever executes
 					currPath.push_back(make_pair(s.coords.first-(2*ind),s.coords.second-(2*ind)));
 					moves.push_back(currPath);
+					currPath.pop_back();
 				}
 				//moves.insert(moves.begin(),temp.begin(),temp.end());
 				// Should I add this ^^^^^ ???? check
@@ -203,8 +205,9 @@ vector<vector<pair<int,int> > > Game::getValidMovesJump(Gameboard g, Gameboard::
 				//cout<<"Printing modified board.."<<endl;
 				//printBoard(newGameboard);
 
+
 				if(moves.size()==1){
-					currPath.pop_back();
+					//currPath.pop_back();
 				}
 				
 
@@ -215,6 +218,7 @@ vector<vector<pair<int,int> > > Game::getValidMovesJump(Gameboard g, Gameboard::
 				if(temp.size()==0){
 					currPath.push_back(make_pair(s.coords.first-(2*ind),s.coords.second+(2*ind)));
 					moves.push_back(currPath);
+					currPath.pop_back();
 				}
 
 				for(int i=0;i<temp.size();i++){
@@ -238,8 +242,9 @@ vector<vector<pair<int,int> > > Game::getValidMovesJump(Gameboard g, Gameboard::
 				//cout<<"Printing modified board.."<<endl;
 				//printBoard(newGameboard);
 
+
 				if(moves.size()==1){
-					currPath.pop_back();
+					//currPath.pop_back();
 				}
 				
 
@@ -250,6 +255,7 @@ vector<vector<pair<int,int> > > Game::getValidMovesJump(Gameboard g, Gameboard::
 				if(temp.size()==0){
 					currPath.push_back(make_pair(s.coords.first+(2*ind),s.coords.second-(2*ind)));
 					moves.push_back(currPath);
+					currPath.pop_back();
 				}
 
 				for(int i=0;i<temp.size();i++){
@@ -272,7 +278,7 @@ vector<vector<pair<int,int> > > Game::getValidMovesJump(Gameboard g, Gameboard::
 				//printBoard(newGameboard);
 
 				if(moves.size()==1){
-					currPath.pop_back();
+					//currPath.pop_back();
 				}
 				
 
@@ -283,6 +289,7 @@ vector<vector<pair<int,int> > > Game::getValidMovesJump(Gameboard g, Gameboard::
 				if(temp.size()==0){
 					currPath.push_back(make_pair(s.coords.first+(2*ind),s.coords.second+(2*ind)));
 					moves.push_back(currPath);
+					currPath.pop_back();
 				}
 
 				for(int i=0;i<temp.size();i++){
