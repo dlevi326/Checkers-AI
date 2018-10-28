@@ -3,4 +3,4 @@
 *.o
 *.exe
 .DS_Store
-
+*.docx

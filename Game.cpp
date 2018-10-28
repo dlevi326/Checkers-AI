@@ -519,6 +519,8 @@ vector<vector<pair<int,int> > > Game::getMoves(int turn,Gameboard g){
 void Game::humanTurn(int turn){
 	// Turn 1: player1
 	// Turn 2: player2
+
+	cout<<"Human turn"<<endl;
 	
 	vector<vector<pair<int,int> > > allMoves = getMoves(turn,currBoard);
 
@@ -577,6 +579,7 @@ void Game::compTurn(int turn){
 	// Turn 2: player2
 	//cout<<"Top left: "<<currBoard.board[0][0].type<<endl;
 
+	cout<<"Computer turn"<<endl;
 	vector<vector<pair<int,int> > > allMoves = getMoves(turn,currBoard);
 
 	//temp = (getValidMoves(currBoard,currBoard.board[1][5]));
@@ -618,17 +621,18 @@ void Game::compTurn(int turn){
 
 }
 
-void Game::executeGame(Gameboard g,int whoseTurn, int gameType){
+void Game::executeGame(Gameboard g,int whoseTurn, int gameType, int timeLimit){
 // gameType = 0: normal (1 comp vs 1 human)
 // gameType = 1: (1 comp vs 1 comp)
 // gameType = 2: (1 human vs 1 human)
 
-// whoseTurn = 1: Human
-// whoseTurn = 0: Comp 
+// whoseTurn = 0: Human
+// whoseTurn = 1: Comp 
 	currBoard = g;
 	int num=0;
 	int turn;
 	(whoseTurn==0) ? turn = 1 : turn = -1;
+	cout<<"Turn is: "<<turn<<endl;
 
 	printBoard(g);
 	while(!endGame){

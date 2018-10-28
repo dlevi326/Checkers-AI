@@ -29,7 +29,7 @@ public:
 
 	void printBoard(Gameboard);
 
-	void executeGame(Gameboard,int=0,int=1); // Starts the game
+	void executeGame(Gameboard,int=0,int=1, int=0); // Starts the game
 
 	vector<vector<Gameboard::Square> > makeMove(Gameboard, vector<pair<int,int> >);
 
