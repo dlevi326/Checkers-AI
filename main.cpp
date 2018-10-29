@@ -88,8 +88,8 @@ int makeChoiceTurn(){
 	return -1;
 }
 
-int makeChoiceTime(){
-	int num = -1;
+double makeChoiceTime(){
+	double num = -1;
 	cin>>num;
 	if(!cin){
 		cin.clear();
@@ -149,7 +149,7 @@ int main(){
 	}
 
 	cout<<"Finally please input time limit in seconds: ";
-	int limit = -1;
+	double limit = -1;
 	while(limit<0){
 		limit = makeChoiceTime();
 	}

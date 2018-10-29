@@ -16,7 +16,7 @@ public:
 	bool endGame; // Did game end
 
 	void humanTurn(int);
-	void compTurn(int);
+	void compTurn(int,double);
 
 	vector<vector<pair<int,int> > > getValidMoves(Gameboard, Gameboard::Square); // Gets all valid moves of a piece
 
@@ -26,13 +26,15 @@ public:
 
 	Game(); // Init
 
-	int makeMove1(vector<vector<pair<int,int> > >, Gameboard);
+	int makeMove1(vector<vector<pair<int,int> > >, Gameboard,double);
+	int makeMove2(vector<vector<pair<int,int> > >, Gameboard,double);
 	int minimax(int,Gameboard,bool,int,int,int);
+	int getHeuristic(Gameboard,int);
 
 
 	void printBoard(Gameboard);
 
-	void executeGame(Gameboard,int=0,int=1, int=0); // Starts the game
+	void executeGame(Gameboard,int=0,int=1, double=1); // Starts the game
 
 	vector<vector<Gameboard::Square> > makeMove(Gameboard, vector<pair<int,int> >);
 

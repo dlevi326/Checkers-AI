@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <unistd.h>
 #include <time.h> 
+#include <ctime>
 #include "Gameboard.h"
 #include "Game.h"
 
@@ -335,7 +336,6 @@ Game::Game(){
 }
 
 void Game::printBoard(Gameboard g){
-	cout << "\033[1;31mNew Board\033[0m\n";
 	for(int i=0;i<35;i++){
 		cout<<"-";
 	}
@@ -563,7 +563,7 @@ void Game::humanTurn(int turn){
 
 }
 
-int getHeuristic(Gameboard g, int turn){
+int Game::getHeuristic(Gameboard g, int turn){
 	
 	string targets[2];
 	string enemies[2];
@@ -607,7 +607,12 @@ int getHeuristic(Gameboard g, int turn){
 		}
 	}
 
-	int heur = 4*(numKings)+1*(numReg)-1*(enemyReg)-4*(enemyKing);
+	int heur = (4*numKings)+(1*numReg)-(1*enemyReg)-(4*enemyKing);
+	//cout<<"PRINTING BOARD"<<endl;
+	//cout << "\033[1;31mPrinting Board\033[0m\n";
+	//printBoard(g);
+	//cout<<"HEURISTIC IS: "<<heur<<endl;
+
 	return heur;
 }
 
@@ -616,7 +621,7 @@ int getHeuristic(Gameboard g, int turn){
 // First - Heuristic
 // Second - Moves
 int Game::minimax(int depth, Gameboard g, bool maxPlayer, int alpha, int beta,int turn){
-	//cout<<"Evaluating at depth: "<<depth<<endl;
+	//cout<<"Evaluating at depth: "<<depth<<"Turn is: "<<turn<<endl;
 	//Should be 1 and 1
 	//cout<<"Turn is: "<<turn<<" Max is: "<<maxPlayer<<endl;
 	int MIN = std::numeric_limits<int>::min();
@@ -672,12 +677,12 @@ int Game::minimax(int depth, Gameboard g, bool maxPlayer, int alpha, int beta,in
 	return 0;
 }
 
-int Game::makeMove1(vector<vector<pair<int,int> > > moves, Gameboard g){
+int Game::makeMove1(vector<vector<pair<int,int> > > moves, Gameboard g,double secs){
 	cout<<"Comp 1 turn"<<endl;
 	int MIN = std::numeric_limits<int>::min();
 	int MAX = std::numeric_limits<int>::max();
 
-	int maxVal = MIN;
+	
 	int moveNum = -1;
 
 	Gameboard tempGame;
@@ -685,16 +690,48 @@ int Game::makeMove1(vector<vector<pair<int,int> > > moves, Gameboard g){
 
 	//currBoard.board = makeMove(currBoard, allMoves[moveNum]);
 
-	for(int i=0;i<moves.size();i++){
-		
-		tempGame.board = makeMove(g,moves[i]);
-		int currVal = minimax(1,tempGame,false,MIN,MAX,-1);
-		cout<<"HEURISTIC: "<<currVal<<endl;
-		if(currVal>maxVal){
-			maxVal = currVal;
-			moveNum = i;
+	clock_t start;
+	double dur;
+	start = clock();
+
+	dur = 0;//(clock()-start)/(double) CLOCKS_PER_SEC;
+
+	int currDepth=0;
+	while(dur<(double)secs/2){
+		int NUM_DEPTH=currDepth;
+		int maxVal;
+		if(NUM_DEPTH%2==0){
+			maxVal=MAX;
 		}
+		else{
+			maxVal=MIN;
+		}
+		//int maxVal = MIN;
+		for(int i=0;i<moves.size();i++){
+			
+			int currVal;
+			if(NUM_DEPTH%2==0){
+				tempGame.board = makeMove(g,moves[i]);
+				currVal = minimax(NUM_DEPTH,tempGame,false,MIN,MAX,-1);
+				if(currVal<maxVal){
+					maxVal = currVal;
+					moveNum = i;
+				}
+			}
+			else{
+				tempGame.board = makeMove(g,moves[i]);
+				currVal = minimax(NUM_DEPTH,tempGame,true,MIN,MAX,-1);
+				if(currVal>maxVal){
+					maxVal = currVal;
+					moveNum = i;
+				}
+			}
+			//cout<<"HEURISTIC: "<<currVal<<endl;
+		}
+		currDepth++;
+		dur = (clock()-start)/(double) CLOCKS_PER_SEC;
 	}
+	cout<<"Finished searching after: "<<dur<<" seconds and reached depth: "<<currDepth-1<<endl;
 
 
 	//int moveNum = (rand()%moves.size());
@@ -702,13 +739,74 @@ int Game::makeMove1(vector<vector<pair<int,int> > > moves, Gameboard g){
 	return moveNum;
 }
 
-int makeMove2(vector<vector<pair<int,int> > > moves){
-	cout<<"Comp 2 turn"<<endl;
+int Game::makeMove2(vector<vector<pair<int,int> > > moves, Gameboard g, double secs){
+	/*cout<<"Comp 2 turn"<<endl;
 	int moveNum = (rand()%moves.size());
+	return moveNum;*/
+
+	cout<<"Comp 2 turn"<<endl;
+	int MIN = std::numeric_limits<int>::min();
+	int MAX = std::numeric_limits<int>::max();
+
+	
+	int moveNum = -1;
+
+	Gameboard tempGame;
+	tempGame.board = g.board;
+
+	//currBoard.board = makeMove(currBoard, allMoves[moveNum]);
+
+	clock_t start;
+	double dur;
+	start = clock();
+
+	dur = 0;//(clock()-start)/(double) CLOCKS_PER_SEC;
+
+	int currDepth=0;
+	while(dur<(double)secs/2){
+		int NUM_DEPTH=currDepth;
+		int maxVal;
+		if(NUM_DEPTH%2==0){
+			maxVal=MAX;
+		}
+		else{
+			maxVal=MIN;
+		}
+		//int maxVal = MIN;
+		for(int i=0;i<moves.size();i++){
+			
+			int currVal;
+			if(NUM_DEPTH%2==0){
+				tempGame.board = makeMove(g,moves[i]);
+				currVal = minimax(NUM_DEPTH,tempGame,false,MIN,MAX,1);
+				if(currVal<maxVal){
+					maxVal = currVal;
+					moveNum = i;
+				}
+			}
+			else{
+				tempGame.board = makeMove(g,moves[i]);
+				currVal = minimax(NUM_DEPTH,tempGame,true,MIN,MAX,1);
+				if(currVal>maxVal){
+					maxVal = currVal;
+					moveNum = i;
+				}
+			}
+			//cout<<"HEURISTIC: "<<currVal<<endl;
+		}
+		currDepth++;
+		dur = (clock()-start)/(double) CLOCKS_PER_SEC;
+	}
+	cout<<"Finished searching after: "<<dur<<" seconds and reached depth: "<<currDepth-1<<endl;
+
+
+	//int moveNum = (rand()%moves.size());
+	//return 0;
 	return moveNum;
+	
 }
 
-void Game::compTurn(int turn){
+void Game::compTurn(int turn,double secs){
 
 	// Turn 1: player1
 	// Turn 2: player2
@@ -740,10 +838,11 @@ void Game::compTurn(int turn){
 			return;
 		}
 		if(turn==1){
-			moveNum = makeMove1(allMoves,currBoard);
+			moveNum = makeMove1(allMoves,currBoard,secs);
 		}
 		else{
-			moveNum = makeMove2(allMoves);
+			//moveNum = makeMove2(allMoves);
+			moveNum = makeMove2(allMoves,currBoard,secs);
 		}
 		//(turn==1) ? moveNum =  makeMove2(allMoves) : moveNum = makeMove1(allMoves,currBoard);
 		//moveNum = (rand()%allMoves.size());
@@ -762,7 +861,7 @@ void Game::compTurn(int turn){
 
 }
 
-void Game::executeGame(Gameboard g,int whoseTurn, int gameType, int timeLimit){
+void Game::executeGame(Gameboard g,int whoseTurn, int gameType, double timeLimit){
 // gameType = 0: normal (1 comp vs 1 human)
 // gameType = 1: (1 comp vs 1 comp)
 // gameType = 2: (1 human vs 1 human)
@@ -772,7 +871,7 @@ void Game::executeGame(Gameboard g,int whoseTurn, int gameType, int timeLimit){
 	currBoard = g;
 	int num=0;
 	int turn;
-	(whoseTurn==0) ? turn = -1 : turn = 1;
+	(whoseTurn==0) ? turn = 1 : turn = -1;
 	cout<<"Turn is: "<<turn<<endl;
 
 	printBoard(g);
@@ -785,18 +884,18 @@ void Game::executeGame(Gameboard g,int whoseTurn, int gameType, int timeLimit){
 					humanTurn(turn);
 				}
 				else{
-					compTurn(turn);
+					compTurn(turn,timeLimit);
 				}
 				turn*=-1;
 				break;
 			case 1:
 				if(turn>0){
-					compTurn(turn);
+					compTurn(turn,timeLimit);
 					//sleep(.5);
 					usleep(200000);
 				}
 				else{
-					compTurn(turn);
+					compTurn(turn,timeLimit);
 					//sleep(.5);
 					usleep(200000);
 				}
