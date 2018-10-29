@@ -563,12 +563,147 @@ void Game::humanTurn(int turn){
 
 }
 
-int makeMove1(vector<vector<pair<int,int> > > moves){
-	int moveNum = (rand()%moves.size());
+int getHeuristic(Gameboard g, int turn){
+	
+	string targets[2];
+	string enemies[2];
+
+	if(turn==1){
+		targets[0] = g.player1GameReg;
+		targets[1] = g.player1GameKing;
+		enemies[0] = g.player2GameReg;
+		enemies[1] = g.player2GameKing;
+	} 
+	else{
+		targets[0] = g.player2GameReg;
+		targets[1] = g.player2GameKing;
+		enemies[0] = g.player1GameReg;
+		enemies[1] = g.player1GameKing;
+	}
+
+	// If turn=1, enemyReg=x
+	// If turn=-1, enemyReg=0
+	//cout<<"Turn: "<<turn<<" EnemyReg: "<<enemies[0]<<endl;
+
+	int numKings = 0;
+	int numReg = 0;
+	int enemyReg = 0;
+	int enemyKing = 0;
+
+	for(int i=0;i<g.board.size();i++){
+		for(int j=0;j<g.board[i].size();j++){
+			if(g.board[i][j].type==targets[0]){
+				numReg++;
+			}
+			else if(g.board[i][j].type==targets[1]){
+				numKings++;
+			}
+			else if(g.board[i][j].type==enemies[0]){
+				enemyReg++;
+			}
+			else if(g.board[i][j].type==enemies[1]){
+				enemyKing++;
+			}
+		}
+	}
+
+	int heur = 4*(numKings)+1*(numReg)-1*(enemyReg)-4*(enemyKing);
+	return heur;
+}
+
+
+// Pair:
+// First - Heuristic
+// Second - Moves
+int Game::minimax(int depth, Gameboard g, bool maxPlayer, int alpha, int beta,int turn){
+	//cout<<"Evaluating at depth: "<<depth<<endl;
+	//Should be 1 and 1
+	//cout<<"Turn is: "<<turn<<" Max is: "<<maxPlayer<<endl;
+	int MIN = std::numeric_limits<int>::min();
+	int MAX = std::numeric_limits<int>::max();
+
+	if(depth==0) return getHeuristic(g,turn);
+
+	if(maxPlayer){
+
+		int best = MIN;
+		vector<vector<pair<int,int> > > moves = getMoves(turn, g);
+		if(moves.size()==0){
+			return getHeuristic(g,turn);
+		}
+		Gameboard tempGame;
+		tempGame.board = g.board;
+
+		for(int i=0;i<moves.size();i++){
+			tempGame.board = makeMove(g,moves[i]);
+			int val = minimax(depth-1,tempGame,false,alpha,beta,turn*-1);
+
+			best = max(best,val);
+			alpha = max(alpha,best);
+			if(beta<=alpha) break;
+		}
+
+		return best;
+		
+	}
+	else{
+
+		int best = MAX;
+		vector<vector<pair<int,int> > > moves = getMoves(turn, g);
+		if(moves.size()==0){
+			return getHeuristic(g,turn);
+		}
+		Gameboard tempGame;
+		tempGame.board = g.board;
+
+		for(int i=0;i<moves.size();i++){
+			tempGame.board = makeMove(g,moves[i]);
+			int val = minimax(depth-1,tempGame,true,alpha,beta,turn*-1);
+
+			best = min(best,val);
+			beta = min(beta,best);
+			if(beta<=alpha) break;
+		}
+
+		return best;
+
+	}
+
+	return 0;
+}
+
+int Game::makeMove1(vector<vector<pair<int,int> > > moves, Gameboard g){
+	cout<<"Comp 1 turn"<<endl;
+	int MIN = std::numeric_limits<int>::min();
+	int MAX = std::numeric_limits<int>::max();
+
+	int maxVal = MIN;
+	int moveNum = -1;
+
+	Gameboard tempGame;
+	tempGame.board = g.board;
+
+	//currBoard.board = makeMove(currBoard, allMoves[moveNum]);
+
+	for(int i=0;i<moves.size();i++){
+		
+		tempGame.board = makeMove(g,moves[i]);
+		int currVal = minimax(1,tempGame,false,MIN,MAX,-1);
+		cout<<"HEURISTIC: "<<currVal<<endl;
+		if(currVal>maxVal){
+			maxVal = currVal;
+			moveNum = i;
+		}
+	}
+
+
+	//int moveNum = (rand()%moves.size());
+	//return 0;
 	return moveNum;
 }
 
 int makeMove2(vector<vector<pair<int,int> > > moves){
+	cout<<"Comp 2 turn"<<endl;
 	int moveNum = (rand()%moves.size());
 	return moveNum;
 }
@@ -604,7 +739,13 @@ void Game::compTurn(int turn){
 			endGame = true;
 			return;
 		}
-		(turn==1) ? moveNum = makeMove1(allMoves) : moveNum = makeMove2(allMoves);
+		if(turn==1){
+			moveNum = makeMove1(allMoves,currBoard);
+		}
+		else{
+			moveNum = makeMove2(allMoves);
+		}
+		//(turn==1) ? moveNum =  makeMove2(allMoves) : moveNum = makeMove1(allMoves,currBoard);
 		//moveNum = (rand()%allMoves.size());
 	}
 
@@ -631,7 +772,7 @@ void Game::executeGame(Gameboard g,int whoseTurn, int gameType, int timeLimit){
 	currBoard = g;
 	int num=0;
 	int turn;
-	(whoseTurn==0) ? turn = 1 : turn = -1;
+	(whoseTurn==0) ? turn = -1 : turn = 1;
 	cout<<"Turn is: "<<turn<<endl;
 
 	printBoard(g);

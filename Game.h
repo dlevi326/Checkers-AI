@@ -26,6 +26,9 @@ public:
 
 	Game(); // Init
 
+	int makeMove1(vector<vector<pair<int,int> > >, Gameboard);
+	int minimax(int,Gameboard,bool,int,int,int);
+
 
 	void printBoard(Gameboard);
 
