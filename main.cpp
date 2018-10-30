@@ -101,6 +101,10 @@ double makeChoiceTime(){
 		cout<<"Invalid time limit, please choose again: ";
 		return -1;
 	}
+	else if(num<.1){
+		cout<<"Time must be greater than .1 seconds, please choose again: ";
+		return -1;
+	}
 	else{
 		return num;
 	}

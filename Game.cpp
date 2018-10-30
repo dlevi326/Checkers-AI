@@ -616,16 +616,19 @@ int Game::getHeuristic(Gameboard g, int turn){
 	return heur;
 }
 
+int GLOBAL_MOVE_1=-1;
 
 // Pair:
 // First - Heuristic
 // Second - Moves
-int Game::minimax(int depth, Gameboard g, bool maxPlayer, int alpha, int beta,int turn){
+int Game::minimax(int depth, Gameboard g, bool maxPlayer, int alpha, int beta,int turn,bool isEven){
 	//cout<<"Evaluating at depth: "<<depth<<"Turn is: "<<turn<<endl;
 	//Should be 1 and 1
 	//cout<<"Turn is: "<<turn<<" Max is: "<<maxPlayer<<endl;
 	int MIN = std::numeric_limits<int>::min();
 	int MAX = std::numeric_limits<int>::max();
+
+	int correctInd=-1;
 
 	if(depth==0) return getHeuristic(g,turn);
 
@@ -638,16 +641,43 @@ int Game::minimax(int depth, Gameboard g, bool maxPlayer, int alpha, int beta,in
 		}
 		Gameboard tempGame;
 		tempGame.board = g.board;
-
+		int superMax;
+		if(isEven){
+			superMax = MIN;
+		}
+		else{
+			superMax = MAX;
+		}
+		//int superMax = MAX;
 		for(int i=0;i<moves.size();i++){
 			tempGame.board = makeMove(g,moves[i]);
-			int val = minimax(depth-1,tempGame,false,alpha,beta,turn*-1);
+			int val;
+			if(depth-1%2==0){
+				val = minimax(depth-1,tempGame,false,alpha,beta,turn*-1,true);
+			}
+			else{
+				val = minimax(depth-1,tempGame,false,alpha,beta,turn*-1,false);
+			}
+			//int val = minimax(depth-1,tempGame,false,alpha,beta,turn*-1);
+
+			if(isEven){
+				if(val>superMax){
+					superMax=val;
+					correctInd=i;
+				}
+			}
+			else{
+				if(val<superMax){
+					superMax=val;
+					correctInd=i;
+				}
+			}
 
 			best = max(best,val);
 			alpha = max(alpha,best);
-			if(beta<=alpha) break;
 		}
 
+		GLOBAL_MOVE_1 = correctInd;
 		return best;
 		
 	}
@@ -663,7 +693,14 @@ int Game::minimax(int depth, Gameboard g, bool maxPlayer, int alpha, int beta,in
 
 		for(int i=0;i<moves.size();i++){
 			tempGame.board = makeMove(g,moves[i]);
-			int val = minimax(depth-1,tempGame,true,alpha,beta,turn*-1);
+			int val;
+			if(depth-1%2==0){
+				val = minimax(depth-1,tempGame,true,alpha,beta,turn*-1,true);
+			}
+			else{
+				val = minimax(depth-1,tempGame,true,alpha,beta,turn*-1,false);
+			}
+			//int val = minimax(depth-1,tempGame,true,alpha,beta,turn*-1);
 
 			best = min(best,val);
 			beta = min(beta,best);
@@ -699,35 +736,15 @@ int Game::makeMove1(vector<vector<pair<int,int> > > moves, Gameboard g,double se
 	int currDepth=0;
 	while(dur<(double)secs/2){
 		int NUM_DEPTH=currDepth;
-		int maxVal;
 		if(NUM_DEPTH%2==0){
-			maxVal=MAX;
+			minimax(NUM_DEPTH,g,true,MIN,MAX,1,true);
 		}
 		else{
-			maxVal=MIN;
+			minimax(NUM_DEPTH,g,true,MIN,MAX,1,false);
 		}
-		//int maxVal = MIN;
-		for(int i=0;i<moves.size();i++){
-			
-			int currVal;
-			if(NUM_DEPTH%2==0){
-				tempGame.board = makeMove(g,moves[i]);
-				currVal = minimax(NUM_DEPTH,tempGame,false,MIN,MAX,-1);
-				if(currVal<maxVal){
-					maxVal = currVal;
-					moveNum = i;
-				}
-			}
-			else{
-				tempGame.board = makeMove(g,moves[i]);
-				currVal = minimax(NUM_DEPTH,tempGame,true,MIN,MAX,-1);
-				if(currVal>maxVal){
-					maxVal = currVal;
-					moveNum = i;
-				}
-			}
-			//cout<<"HEURISTIC: "<<currVal<<endl;
-		}
+
+		moveNum = GLOBAL_MOVE_1;
+		
 		currDepth++;
 		dur = (clock()-start)/(double) CLOCKS_PER_SEC;
 	}
@@ -764,36 +781,16 @@ int Game::makeMove2(vector<vector<pair<int,int> > > moves, Gameboard g, double s
 
 	int currDepth=0;
 	while(dur<(double)secs/2){
+
 		int NUM_DEPTH=currDepth;
-		int maxVal;
 		if(NUM_DEPTH%2==0){
-			maxVal=MAX;
+			minimax(NUM_DEPTH,g,true,MIN,MAX,-1,true);
 		}
 		else{
-			maxVal=MIN;
+			minimax(NUM_DEPTH,g,true,MIN,MAX,-1,false);
 		}
-		//int maxVal = MIN;
-		for(int i=0;i<moves.size();i++){
-			
-			int currVal;
-			if(NUM_DEPTH%2==0){
-				tempGame.board = makeMove(g,moves[i]);
-				currVal = minimax(NUM_DEPTH,tempGame,false,MIN,MAX,1);
-				if(currVal<maxVal){
-					maxVal = currVal;
-					moveNum = i;
-				}
-			}
-			else{
-				tempGame.board = makeMove(g,moves[i]);
-				currVal = minimax(NUM_DEPTH,tempGame,true,MIN,MAX,1);
-				if(currVal>maxVal){
-					maxVal = currVal;
-					moveNum = i;
-				}
-			}
-			//cout<<"HEURISTIC: "<<currVal<<endl;
-		}
+		moveNum = GLOBAL_MOVE_1;
+
 		currDepth++;
 		dur = (clock()-start)/(double) CLOCKS_PER_SEC;
 	}
