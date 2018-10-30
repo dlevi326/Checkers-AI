@@ -563,6 +563,15 @@ void Game::humanTurn(int turn){
 
 }
 
+int Game::getHeuristic1(Gameboard g, int turn){
+	return getHeuristic(g,turn);
+}
+
+int Game::getHeuristic2(Gameboard g, int turn){
+	return 0;
+	//return getHeuristic(g,turn);
+}
+
 int Game::getHeuristic(Gameboard g, int turn){
 	
 	string targets[2];
@@ -621,7 +630,7 @@ int GLOBAL_MOVE_1=-1;
 // Pair:
 // First - Heuristic
 // Second - Moves
-int Game::minimax(int depth, Gameboard g, bool maxPlayer, int alpha, int beta,int turn,bool isEven){
+int Game::minimax(int depth, Gameboard g, bool maxPlayer, int alpha, int beta,int turn,bool isEven,bool isPlayer1){
 	//cout<<"Evaluating at depth: "<<depth<<"Turn is: "<<turn<<endl;
 	//Should be 1 and 1
 	//cout<<"Turn is: "<<turn<<" Max is: "<<maxPlayer<<endl;
@@ -630,14 +639,26 @@ int Game::minimax(int depth, Gameboard g, bool maxPlayer, int alpha, int beta,in
 
 	int correctInd=-1;
 
-	if(depth==0) return getHeuristic(g,turn);
+	if(depth==0){
+		if(isPlayer1){
+			return getHeuristic1(g,turn);
+		}
+		else{
+			return getHeuristic2(g,turn);
+		}
+	} 
 
 	if(maxPlayer){
 
 		int best = MIN;
 		vector<vector<pair<int,int> > > moves = getMoves(turn, g);
 		if(moves.size()==0){
-			return getHeuristic(g,turn);
+			if(isPlayer1){
+				return getHeuristic1(g,turn);
+			}
+			else{
+				return getHeuristic2(g,turn);
+			}
 		}
 		Gameboard tempGame;
 		tempGame.board = g.board;
@@ -653,10 +674,10 @@ int Game::minimax(int depth, Gameboard g, bool maxPlayer, int alpha, int beta,in
 			tempGame.board = makeMove(g,moves[i]);
 			int val;
 			if(depth-1%2==0){
-				val = minimax(depth-1,tempGame,false,alpha,beta,turn*-1,true);
+				val = minimax(depth-1,tempGame,false,alpha,beta,turn*-1,true,isPlayer1);
 			}
 			else{
-				val = minimax(depth-1,tempGame,false,alpha,beta,turn*-1,false);
+				val = minimax(depth-1,tempGame,false,alpha,beta,turn*-1,false,isPlayer1);
 			}
 			//int val = minimax(depth-1,tempGame,false,alpha,beta,turn*-1);
 
@@ -686,7 +707,12 @@ int Game::minimax(int depth, Gameboard g, bool maxPlayer, int alpha, int beta,in
 		int best = MAX;
 		vector<vector<pair<int,int> > > moves = getMoves(turn, g);
 		if(moves.size()==0){
-			return getHeuristic(g,turn);
+			if(isPlayer1){
+				return getHeuristic1(g,turn);
+			}
+			else{
+				return getHeuristic2(g,turn);
+			}
 		}
 		Gameboard tempGame;
 		tempGame.board = g.board;
@@ -695,10 +721,10 @@ int Game::minimax(int depth, Gameboard g, bool maxPlayer, int alpha, int beta,in
 			tempGame.board = makeMove(g,moves[i]);
 			int val;
 			if(depth-1%2==0){
-				val = minimax(depth-1,tempGame,true,alpha,beta,turn*-1,true);
+				val = minimax(depth-1,tempGame,true,alpha,beta,turn*-1,true,isPlayer1);
 			}
 			else{
-				val = minimax(depth-1,tempGame,true,alpha,beta,turn*-1,false);
+				val = minimax(depth-1,tempGame,true,alpha,beta,turn*-1,false,isPlayer1);
 			}
 			//int val = minimax(depth-1,tempGame,true,alpha,beta,turn*-1);
 
@@ -737,10 +763,10 @@ int Game::makeMove1(vector<vector<pair<int,int> > > moves, Gameboard g,double se
 	while(dur<(double)secs/2){
 		int NUM_DEPTH=currDepth;
 		if(NUM_DEPTH%2==0){
-			minimax(NUM_DEPTH,g,true,MIN,MAX,1,true);
+			minimax(NUM_DEPTH,g,true,MIN,MAX,1,true,true);
 		}
 		else{
-			minimax(NUM_DEPTH,g,true,MIN,MAX,1,false);
+			minimax(NUM_DEPTH,g,true,MIN,MAX,1,false,true);
 		}
 
 		moveNum = GLOBAL_MOVE_1;
@@ -784,10 +810,10 @@ int Game::makeMove2(vector<vector<pair<int,int> > > moves, Gameboard g, double s
 
 		int NUM_DEPTH=currDepth;
 		if(NUM_DEPTH%2==0){
-			minimax(NUM_DEPTH,g,true,MIN,MAX,-1,true);
+			minimax(NUM_DEPTH,g,true,MIN,MAX,-1,true,false);
 		}
 		else{
-			minimax(NUM_DEPTH,g,true,MIN,MAX,-1,false);
+			minimax(NUM_DEPTH,g,true,MIN,MAX,-1,false,false);
 		}
 		moveNum = GLOBAL_MOVE_1;
 
