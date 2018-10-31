@@ -98,6 +98,11 @@ void Gameboard::load_board(Gameboard& g,string file){
     			ind2++;
     			break;
     		default:
+				// May take out
+				/*g.board[ind1][ind2].type = g.blankGame;
+    			g.board[ind1][ind2].isKing = false;
+    			ind2++;
+    			break;*/
     			continue;
     		}
 

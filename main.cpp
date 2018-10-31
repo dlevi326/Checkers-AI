@@ -135,6 +135,17 @@ int main(){
 			turn = makeChoiceTurn();
 		}
 	}
+	else{
+		cout<<"Who would you like to start:"<<endl;
+		cout<<"(0) player1 Start"<<endl;
+		cout<<"(1) player2 start"<<endl;
+		cout<<"Please make selection: ";
+
+		turn = -1;
+		while(turn<0){
+			turn = makeChoiceTurn();
+		}
+	}
 	
 	cout<<"Thank you, would you like to load an existing board (y/n)? ";
 	string choice;
