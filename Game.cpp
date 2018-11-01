@@ -1,5 +1,5 @@
 // TODO:
-// Figured out that for the MinPlayer they are choosing the worst possible move, which is screwing up minimax
+// Still need to add: Timing, AB pruning (I think i need to fix AB)
 
 #include <iostream>
 #include <vector>
@@ -626,7 +626,7 @@ int Game::getHeuristic2(Gameboard g, int turn){
 		}
 	}
 
-	int heur = (1000*numKings)+(1000*numReg)-(1000*enemyReg)-(1000*enemyKing);//+(1*numBack);
+	int heur = (4000*numKings)+(1000*numReg)-(1000*enemyReg)-(4000*enemyKing);//+(1*numBack);
 	//cout<<"PRINTING BOARD"<<endl;
 	//cout << "\033[1;31mPrinting Board\033[0m\n";
 	//printBoard(g);
@@ -723,11 +723,11 @@ int Game::minimax(int depth,int maxDepth, Gameboard g, bool maxPlayer, int alpha
 	int correctInd=-1;
 
 	double dur = (clock()-start)/(double) CLOCKS_PER_SEC;
-	/*if(dur>=timeLimit){
-		cout<<"Breaking in middle of minimax!!!"<<endl;
+	if(dur>=timeLimit){
+		//cout<<"Breaking in middle of minimax!!!"<<endl;
 		setGlobal=false;
 		return 0;
-	}*/
+	}
 
 	if(depth==0){
 		if(isPlayer1){
@@ -801,13 +801,15 @@ int Game::minimax(int depth,int maxDepth, Gameboard g, bool maxPlayer, int alpha
 
 			best = max(best,val);
 			alpha = max(alpha,best);
+			//if(beta<=alpha) break;
+
 		}
 
 		//cout<<"Best move at depth: "<<depth<<" is: \n";
 		//printMoves(bestPath);
 		//if(setGlobal){
 		if(depth==maxDepth){
-			cout<<"Best move tied with: "<<bestInds.size()<<" others"<<endl;
+			//cout<<"Best move tied with: "<<bestInds.size()<<" others"<<endl;
 		}
 		GLOBAL_MOVE_1 = bestInds[(rand()%bestInds.size())];
 		//}
