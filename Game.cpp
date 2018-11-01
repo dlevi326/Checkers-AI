@@ -718,13 +718,16 @@ int Game::minimax(int depth,int maxDepth, Gameboard g, bool maxPlayer, int alpha
 	int MIN = std::numeric_limits<int>::min();
 	int MAX = std::numeric_limits<int>::max();
 
+	vector<int> bestInds;
+
 	int correctInd=-1;
 
 	double dur = (clock()-start)/(double) CLOCKS_PER_SEC;
-	if(dur>=timeLimit){
+	/*if(dur>=timeLimit){
+		cout<<"Breaking in middle of minimax!!!"<<endl;
 		setGlobal=false;
 		return 0;
-	}
+	}*/
 
 	if(depth==0){
 		if(isPlayer1){
@@ -765,7 +768,7 @@ int Game::minimax(int depth,int maxDepth, Gameboard g, bool maxPlayer, int alpha
 		//int superMax = MAX;
 		for(int i=0;i<moves.size();i++){
 			/*if(depth==maxDepth){
-				cout<<"Currently evaluating move: "<<i<<endl;
+				cout<<"Currently evaluating move: "<<i<<" with total depth: "<<maxDepth<<endl;
 			}*/
 			tempGame.board = makeMove(g,moves[i]);
 			int val;
@@ -786,6 +789,11 @@ int Game::minimax(int depth,int maxDepth, Gameboard g, bool maxPlayer, int alpha
 				//bestPath = path;
 				superMax=val;
 				correctInd=i;
+				bestInds.clear();
+				bestInds.push_back(i);
+			}
+			else if(val==superMax){
+				bestInds.push_back(i);
 			}
 
 			path.pop_back();
@@ -797,9 +805,12 @@ int Game::minimax(int depth,int maxDepth, Gameboard g, bool maxPlayer, int alpha
 
 		//cout<<"Best move at depth: "<<depth<<" is: \n";
 		//printMoves(bestPath);
-		if(setGlobal){
-			GLOBAL_MOVE_1 = correctInd;
+		//if(setGlobal){
+		if(depth==maxDepth){
+			cout<<"Best move tied with: "<<bestInds.size()<<" others"<<endl;
 		}
+		GLOBAL_MOVE_1 = bestInds[(rand()%bestInds.size())];
+		//}
 		return best;
 		
 	}
@@ -845,7 +856,7 @@ int Game::minimax(int depth,int maxDepth, Gameboard g, bool maxPlayer, int alpha
 
 	}
 
-	return 0;
+	return -1;//0;
 }
 
 int Game::makeMove1(vector<vector<pair<int,int> > > moves, Gameboard g,double secs){
@@ -962,7 +973,7 @@ void Game::compTurn(int turn,double secs){
 	// Turn 2: player2
 	//cout<<"Top left: "<<currBoard.board[0][0].type<<endl;
 
-	cout<<"Computer turn"<<endl;
+	cout<<"Computer turn: "<<turn<<endl;
 	vector<vector<pair<int,int> > > allMoves = getMoves(turn,currBoard);
 
 	//temp = (getValidMoves(currBoard,currBoard.board[1][5]));
