@@ -1,6 +1,8 @@
 // TODO:
 // Still need to add: Timing, AB pruning (I think i need to fix AB)
 
+// maybe i shouldnt sacrifice a piece to get a king
+
 #include <iostream>
 #include <vector>
 #include <cctype>
@@ -568,12 +570,67 @@ void Game::humanTurn(int turn){
 }
 
 int Game::getHeuristic1(Gameboard g, int turn){
-	return getHeuristic(g,turn);
+	//turn*=-1;
+	string targets[2];
+	string enemies[2];
+
+	if(turn==1){
+		targets[0] = g.player1GameReg;
+		targets[1] = g.player1GameKing;
+		enemies[0] = g.player2GameReg;
+		enemies[1] = g.player2GameKing;
+	} 
+	else{
+		targets[0] = g.player2GameReg;
+		targets[1] = g.player2GameKing;
+		enemies[0] = g.player1GameReg;
+		enemies[1] = g.player1GameKing;
+	}
+
+	// If turn=1, enemyReg=x
+	// If turn=-1, enemyReg=0
+	//cout<<"Turn: "<<turn<<" EnemyReg: "<<enemies[0]<<endl;
+
+	int numKings = 0;
+	int numReg = 0;
+	int enemyReg = 0;
+	int enemyKing = 0;
+
+	for(int i=0;i<g.board.size();i++){
+		for(int j=0;j<g.board[i].size();j++){
+			if(g.board[i][j].type==targets[0]){
+				numReg++;
+			}
+			else if(g.board[i][j].type==targets[1]){
+				numKings++;
+			}
+			else if(g.board[i][j].type==enemies[0]){
+				enemyReg++;
+			}
+			else if(g.board[i][j].type==enemies[1]){
+				enemyKing++;
+			}
+		}
+	}
+
+	int heur = (1800*numKings)+(1000*numReg)-(1000*enemyReg)-(1800*enemyKing);
+	/*cout<<"PRINTING BOARD"<<endl;
+	cout << "\033[1;31mPrinting Board\033[0m\n";
+	printBoard(g);
+	cout<<"HEURISTIC IS: "<<heur<<endl;
+	cout<<"NUM OWN KINGS: "<<numKings<<endl;
+	cout<<"NUM OWN REG: "<<numReg<<endl;
+	cout<<"NUM ENEMY KINGS: "<<enemyKing<<endl;
+	cout<<"NUM ENEMY REG: "<<enemyReg<<endl;*/
+
+
+	return heur;
+	//return getHeuristic(g,turn);
 }
 
 int Game::getHeuristic2(Gameboard g, int turn){
 	//return 0;
-	return getHeuristic(g,turn);
+	//return getHeuristic(g,turn);
 	string targets[2];
 	string enemies[2];
 	int backRow;
@@ -626,7 +683,7 @@ int Game::getHeuristic2(Gameboard g, int turn){
 		}
 	}
 
-	int heur = (4000*numKings)+(1000*numReg)-(1000*enemyReg)-(4000*enemyKing);//+(1*numBack);
+	int heur = (2000*numKings)+(1000*numReg)-(1000*enemyReg)-(2000*enemyKing);//+(1*numBack);
 	//cout<<"PRINTING BOARD"<<endl;
 	//cout << "\033[1;31mPrinting Board\033[0m\n";
 	//printBoard(g);
@@ -714,6 +771,7 @@ int Game::minimax(int depth,int maxDepth, Gameboard g, bool maxPlayer, int alpha
 	//Should be 1 and 1
 	//cout<<"Turn is: "<<turn<<" Max is: "<<maxPlayer<<endl;
 	//isEven=false;
+
 	vector<vector<pair<int,int> > > bestPath;
 	int MIN = std::numeric_limits<int>::min();
 	int MAX = std::numeric_limits<int>::max();
@@ -722,7 +780,7 @@ int Game::minimax(int depth,int maxDepth, Gameboard g, bool maxPlayer, int alpha
 
 	int correctInd=-1;
 
-	double dur = (clock()-start)/(double) CLOCKS_PER_SEC;
+	double dur = (double)(clock()-start)/(double) CLOCKS_PER_SEC;
 	if(dur>=timeLimit){
 		//cout<<"Breaking in middle of minimax!!!"<<endl;
 		setGlobal=false;
@@ -740,22 +798,12 @@ int Game::minimax(int depth,int maxDepth, Gameboard g, bool maxPlayer, int alpha
 		}
 	} 
 
-	int superMax;
-	if(maxPlayer){
-		superMax = MIN;
-	}
-	else{
-		superMax = MAX;
-		//superMax = MIN;
-	}
-
 	if(maxPlayer){
 
 		int best = MIN;
 		vector<vector<pair<int,int> > > moves = getMoves(turn, g);
 		if(moves.size()==0){
 			if(isPlayer1){
-				//cout<<"GETTING HEURISTIC FOR DEPTH: "<<depth<<endl;
 				return getHeuristic1(g,turn);
 			}
 			else{
@@ -765,7 +813,6 @@ int Game::minimax(int depth,int maxDepth, Gameboard g, bool maxPlayer, int alpha
 		Gameboard tempGame;
 		tempGame.board = g.board;
 		
-		//int superMax = MAX;
 		for(int i=0;i<moves.size();i++){
 			/*if(depth==maxDepth){
 				cout<<"Currently evaluating move: "<<i<<" with total depth: "<<maxDepth<<endl;
@@ -775,44 +822,36 @@ int Game::minimax(int depth,int maxDepth, Gameboard g, bool maxPlayer, int alpha
 
 			path.push_back(moves[i]);
 			if(depth-1%2==0){
-				//cout<<"DIGGING INTO MOVE: "<<i<<endl;
-				// turn*=-1
 				val = minimax(depth-1,maxDepth,tempGame,false,alpha,beta,turn,true,isPlayer1,start,timeLimit,path);
 			}
 			else{
-				//cout<<"DIGGING INTO MOVE: "<<i<<endl;
-				// turn*=1
 				val = minimax(depth-1,maxDepth,tempGame,false,alpha,beta,turn,false,isPlayer1,start,timeLimit,path);
 			}
 
-			if(val>superMax){
-				//bestPath = path;
-				superMax=val;
+			//best = max(best,val);
+			//alpha = max(alpha,best);
+			if(val>best){
+				best = val;
+				alpha = best;
 				correctInd=i;
 				bestInds.clear();
 				bestInds.push_back(i);
 			}
-			else if(val==superMax){
+			else if(val==best){
 				bestInds.push_back(i);
 			}
 
-			path.pop_back();
-			
-
-			best = max(best,val);
-			alpha = max(alpha,best);
-			//if(beta<=alpha) break;
+			if(beta<=alpha){
+				break;
+			}	
 
 		}
 
-		//cout<<"Best move at depth: "<<depth<<" is: \n";
-		//printMoves(bestPath);
-		//if(setGlobal){
 		if(depth==maxDepth){
 			//cout<<"Best move tied with: "<<bestInds.size()<<" others"<<endl;
 		}
+
 		GLOBAL_MOVE_1 = bestInds[(rand()%bestInds.size())];
-		//}
 		return best;
 		
 	}
@@ -822,11 +861,9 @@ int Game::minimax(int depth,int maxDepth, Gameboard g, bool maxPlayer, int alpha
 		vector<vector<pair<int,int> > > moves = getMoves(turn*-1, g);
 		if(moves.size()==0){
 			if(isPlayer1){
-				//cout<<"GETTING HEURISTIC FOR DEPTH: "<<depth<<endl;
 				return getHeuristic1(g,turn);
 			}
 			else{
-				//cout<<"GETTING HEURISTIC FOR DEPTH: "<<depth<<endl;
 				return getHeuristic2(g,turn);
 			}
 		}
@@ -838,34 +875,42 @@ int Game::minimax(int depth,int maxDepth, Gameboard g, bool maxPlayer, int alpha
 			int val;
 			path.push_back(moves[i]);
 			if(depth-1%2==0){
-				//cout<<"DIGGING INTO MOVE: "<<i<<endl;
-				// turn*=1
 				val = minimax(depth-1,maxDepth,tempGame,true,alpha,beta,turn,true,isPlayer1,start,timeLimit,path);
 			}
 			else{
-				//cout<<"DIGGING INTO MOVE: "<<i<<endl;
-				// turn*=-1
 				val = minimax(depth-1,maxDepth,tempGame,true,alpha,beta,turn,false,isPlayer1,start,timeLimit,path);
 			}
 			
 
-			best = min(best,val);
-			beta = min(beta,best);
-			//if(beta<=alpha) break;
+			//best = min(best,val);
+			//beta = min(beta,best);
+
+			if(val<best){
+				best = val;
+				beta = best;
+			}
+			if(beta<=alpha){
+				break;
+			}
 		}
 
 		return best;
 
 	}
 
-	return -1;//0;
+	return -1;
 }
 
 int Game::makeMove1(vector<vector<pair<int,int> > > moves, Gameboard g,double secs){
 	cout<<"Comp 1 turn"<<endl;
 	int MIN = std::numeric_limits<int>::min();
 	int MAX = std::numeric_limits<int>::max();
+	//cout<<MIN<<endl;
+	//cout<<MAX<<endl;
 
+	if(getMoves(1, g).size()==1){
+		return 0;
+	}
 	
 	int moveNum = -1;
 
@@ -902,7 +947,7 @@ int Game::makeMove1(vector<vector<pair<int,int> > > moves, Gameboard g,double se
 		}
 		
 		currDepth++;
-		dur = (clock()-start)/(double) CLOCKS_PER_SEC;
+		dur = (double)(clock()-start)/(double) CLOCKS_PER_SEC;
 
 		// TEST
 		//break;
@@ -919,6 +964,10 @@ int Game::makeMove2(vector<vector<pair<int,int> > > moves, Gameboard g, double s
 	/*cout<<"Comp 2 turn"<<endl;
 	int moveNum = (rand()%moves.size());
 	return moveNum;*/
+
+	if(getMoves(-1, g).size()==1){
+		return 0;
+	}
 
 	cout<<"Comp 2 turn"<<endl;
 	int MIN = std::numeric_limits<int>::min();
@@ -940,7 +989,7 @@ int Game::makeMove2(vector<vector<pair<int,int> > > moves, Gameboard g, double s
 
 	vector<vector<pair<int,int> > > path;
 	int currDepth=0;
-	while(dur<(double)secs/2){
+	while(dur<(double)secs){
 		int NUM_DEPTH=currDepth;
 		if(NUM_DEPTH%2==0){
 			minimax(NUM_DEPTH,NUM_DEPTH,g,true,MIN,MAX,-1,true,false,start,secs,path);
@@ -958,7 +1007,7 @@ int Game::makeMove2(vector<vector<pair<int,int> > > moves, Gameboard g, double s
 		}
 
 		currDepth++;
-		dur = (clock()-start)/(double) CLOCKS_PER_SEC;
+		dur = (double)(clock()-start)/(double) CLOCKS_PER_SEC;
 	}
 	cout<<"Finished searching after: "<<dur<<" seconds and reached depth: "<<currDepth-1<<endl;
 
