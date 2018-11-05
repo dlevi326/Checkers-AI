@@ -67,6 +67,7 @@ void Gameboard::load_board(Gameboard& g,string file){
 	int ind2=0;
 	while ( getline (inFile,line) )
     {
+		if(line=="") break;
     	for(int i=0;i<line.length();i++){
     		int num = (int) line[i]- '0';
     		//ind1 = 0;
@@ -77,22 +78,25 @@ void Gameboard::load_board(Gameboard& g,string file){
     			g.board[ind1][ind2].isKing = false;
     			ind2++;
     			break;
-    		case 1:
+    		//case 1:
+			case 2:
     			g.board[ind1][ind2].type = g.player1GameReg;
     			g.board[ind1][ind2].isKing = false;
     			ind2++;
     			break;
-    		case 2:
+    		//case 2:
+			case 4:
     			g.board[ind1][ind2].type = g.player1GameKing;
     			g.board[ind1][ind2].isKing = true;
     			ind2++;
     			break;
-    		case 3:
+    		//case 3:
+			case 1:
     			g.board[ind1][ind2].type = g.player2GameReg;
     			g.board[ind1][ind2].isKing = false;
     			ind2++;
     			break;
-    		case 4:
+    		case 3:
     			g.board[ind1][ind2].type = g.player2GameKing;
     			g.board[ind1][ind2].isKing = true;
     			ind2++;

@@ -75,11 +75,11 @@ int makeChoiceTurn(){
 	if(!cin){
 		cin.clear();
 		cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-		cout<<"Invalid turn, please choose again: ";
+		cout<<"Invalid choice, please choose again: ";
 		return -1;
 	}
 	if(num != 0 && num != 1){
-		cout<<"Invalid turn, please choose again: ";
+		cout<<"Invalid choice, please choose again: ";
 		return -1;
 	}
 	else{
@@ -146,6 +146,19 @@ int main(){
 			turn = makeChoiceTurn();
 		}
 	}
+
+	int player;
+	if(mode==0){
+		cout<<"What player would you like to be?"<<endl;
+		cout<<"(0) Player1"<<endl;
+		cout<<"(1) Player2 (Recommended)"<<endl;
+		cout<<"Please make selection: ";
+
+		player = -1;
+		while(player<0){
+			player = makeChoiceTurn();
+		}
+	}
 	
 	cout<<"Thank you, would you like to load an existing board (y/n)? ";
 	string choice;
@@ -174,7 +187,7 @@ int main(){
 
 	game.load_board(game,boardFile);
 
-	g.executeGame(game,turn,mode,limit);
+	g.executeGame(game,turn,mode,limit,player);
 
 
 

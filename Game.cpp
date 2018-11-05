@@ -569,7 +569,8 @@ void Game::humanTurn(int turn){
 
 }
 
-int Game::getHeuristic1(Gameboard g, int turn){
+int Game::getHeuristic1(Gameboard g, int turn,int depth){
+	return getHeuristic2(g,turn,depth);
 	//turn*=-1;
 	string targets[2];
 	string enemies[2];
@@ -587,10 +588,6 @@ int Game::getHeuristic1(Gameboard g, int turn){
 		enemies[1] = g.player1GameKing;
 	}
 
-	// If turn=1, enemyReg=x
-	// If turn=-1, enemyReg=0
-	//cout<<"Turn: "<<turn<<" EnemyReg: "<<enemies[0]<<endl;
-
 	int numKings = 0;
 	int numReg = 0;
 	int enemyReg = 0;
@@ -611,6 +608,13 @@ int Game::getHeuristic1(Gameboard g, int turn){
 				enemyKing++;
 			}
 		}
+	}
+
+	if(numReg+numKings==0){
+		return -100000;
+	}
+	if(enemyReg+enemyKing==0){
+		return 100000;
 	}
 
 	int heur = (1800*numKings)+(1000*numReg)-(1000*enemyReg)-(1800*enemyKing);
@@ -628,42 +632,40 @@ int Game::getHeuristic1(Gameboard g, int turn){
 	//return getHeuristic(g,turn);
 }
 
-int Game::getHeuristic2(Gameboard g, int turn){
-	//return 0;
+int Game::getHeuristic2(Gameboard g, int turn, int depth){
+
 	//return getHeuristic(g,turn);
+	
 	string targets[2];
 	string enemies[2];
-	int backRow;
 
+	int back;
 	if(turn==1){
 		targets[0] = g.player1GameReg;
 		targets[1] = g.player1GameKing;
 		enemies[0] = g.player2GameReg;
 		enemies[1] = g.player2GameKing;
-		backRow=0;
+		back=0;
 	} 
 	else{
 		targets[0] = g.player2GameReg;
 		targets[1] = g.player2GameKing;
 		enemies[0] = g.player1GameReg;
 		enemies[1] = g.player1GameKing;
-		backRow=7;
+		back=7;
 	}
-
-	// If turn=1, enemyReg=x
-	// If turn=-1, enemyReg=0
-	//cout<<"Turn: "<<turn<<" EnemyReg: "<<enemies[0]<<endl;
 
 	int numKings = 0;
 	int numReg = 0;
 	int enemyReg = 0;
 	int enemyKing = 0;
-
-	int numExposed=0;
-	int numBack=0;
+	int numBack = 0;
 
 	for(int i=0;i<g.board.size();i++){
 		for(int j=0;j<g.board[i].size();j++){
+			if((g.board[i][j].type==targets[0] || g.board[i][j].type==targets[1]) && i==back){
+				numBack++;
+			}
 			if(g.board[i][j].type==targets[0]){
 				numReg++;
 			}
@@ -676,23 +678,51 @@ int Game::getHeuristic2(Gameboard g, int turn){
 			else if(g.board[i][j].type==enemies[1]){
 				enemyKing++;
 			}
-
-			if(i==backRow&&(g.board[i][j].type==targets[0] || g.board[i][j].type==targets[1])){
-				numBack++;
-			}
 		}
 	}
 
-	int heur = (2000*numKings)+(1000*numReg)-(1000*enemyReg)-(2000*enemyKing);//+(1*numBack);
+	int otherScore=0;
+	if(numReg+numKings==0){
+		otherScore-=10000;
+	}
+	if(enemyReg+enemyKing==0){
+		otherScore+=10000;
+	}
+
+	int valEnemyKing;
+	int valEnemyReg;
+	int valTargKing;
+	int valTargReg;
+	if(numKings+numReg>enemyReg+enemyKing){
+		valEnemyKing = 20;//800;//1900;
+		valEnemyReg = 10;//500;//1100;
+		valTargKing = 1000;
+		valTargReg = 1000;
+	}
+	else{
+		valEnemyKing = 20;//800;//1700;
+		valEnemyReg = 10;//500;//900;
+		valTargKing = 1000;
+		valTargReg = 1000;
+	}
+
+	int heur = (valTargKing*numKings)+(valTargReg*numReg)-(valEnemyReg*enemyReg)-(valEnemyKing*enemyKing)-depth;//+(100*numBack)+otherScore;
 	//cout<<"PRINTING BOARD"<<endl;
 	//cout << "\033[1;31mPrinting Board\033[0m\n";
 	//printBoard(g);
-	//cout<<"HEURISTIC IS: "<<heur<<endl;
+	/*cout<<"HEURISTIC IS: "<<heur<<endl;
+	cout<<"NUM OWN KINGS: "<<numKings<<endl;
+	cout<<"NUM OWN REG: "<<numReg<<endl;
+	cout<<"NUM ENEMY KINGS: "<<enemyKing<<endl;
+	cout<<"NUM ENEMY REG: "<<enemyReg<<endl;*/
+
 
 	return heur;
+
+
 }
 
-int Game::getHeuristic(Gameboard g, int turn){
+int Game::getHeuristic(Gameboard g, int turn, int depth){
 	//turn*=-1;
 	string targets[2];
 	string enemies[2];
@@ -781,20 +811,21 @@ int Game::minimax(int depth,int maxDepth, Gameboard g, bool maxPlayer, int alpha
 	int correctInd=-1;
 
 	double dur = (double)(clock()-start)/(double) CLOCKS_PER_SEC;
-	if(dur>=timeLimit){
+	if(dur>=(timeLimit-.1)){
 		//cout<<"Breaking in middle of minimax!!!"<<endl;
+		//cout<<"Dur is: "<<dur<<" with a timeLimit of: "<<timeLimit<<endl;
 		setGlobal=false;
-		return 0;
+		return -1;
 	}
 
 	if(depth==0){
 		if(isPlayer1){
 			//cout<<"GETTING HEURISTIC FOR DEPTH: "<<depth<<endl;
 			//printMoves(path);
-			return getHeuristic1(g,turn);
+			return getHeuristic1(g,turn,depth);
 		}
 		else{
-			return getHeuristic2(g,turn);
+			return getHeuristic2(g,turn,depth);
 		}
 	} 
 
@@ -804,10 +835,10 @@ int Game::minimax(int depth,int maxDepth, Gameboard g, bool maxPlayer, int alpha
 		vector<vector<pair<int,int> > > moves = getMoves(turn, g);
 		if(moves.size()==0){
 			if(isPlayer1){
-				return getHeuristic1(g,turn);
+				return getHeuristic1(g,turn,depth);
 			}
 			else{
-				return getHeuristic2(g,turn);
+				return getHeuristic2(g,turn,depth);
 			}
 		}
 		Gameboard tempGame;
@@ -821,13 +852,11 @@ int Game::minimax(int depth,int maxDepth, Gameboard g, bool maxPlayer, int alpha
 			int val;
 
 			path.push_back(moves[i]);
-			if(depth-1%2==0){
-				val = minimax(depth-1,maxDepth,tempGame,false,alpha,beta,turn,true,isPlayer1,start,timeLimit,path);
+			val = minimax(depth-1,maxDepth,tempGame,false,alpha,beta,turn,true,isPlayer1,start,timeLimit,path);
+			if(depth==maxDepth){
+				//cout<<"HEURISTIC IS: "<<val<<endl;
+				//cout<<"FOR MOVE: "<<i<<" at depth: "<<maxDepth<<endl;
 			}
-			else{
-				val = minimax(depth-1,maxDepth,tempGame,false,alpha,beta,turn,false,isPlayer1,start,timeLimit,path);
-			}
-
 			//best = max(best,val);
 			//alpha = max(alpha,best);
 			if(val>best){
@@ -851,7 +880,16 @@ int Game::minimax(int depth,int maxDepth, Gameboard g, bool maxPlayer, int alpha
 			//cout<<"Best move tied with: "<<bestInds.size()<<" others"<<endl;
 		}
 
-		GLOBAL_MOVE_1 = bestInds[(rand()%bestInds.size())];
+		if(depth==maxDepth){
+			//cout<<"-------------------------------"<<endl;
+			//cout<<"Setting global move!!!!"<<endl;
+			GLOBAL_MOVE_1 = bestInds[(rand()%bestInds.size())];
+		}
+		if(depth==maxDepth){
+			//cout<<"HEURISTIC IS: "<<best<<endl;
+			//cout<<"GLOBAL MOVE IS: "<<GLOBAL_MOVE_1<<endl;
+			//cout<<"BEST MOVE TIED WITH: "<<bestInds.size()<<endl;
+		}
 		return best;
 		
 	}
@@ -861,10 +899,10 @@ int Game::minimax(int depth,int maxDepth, Gameboard g, bool maxPlayer, int alpha
 		vector<vector<pair<int,int> > > moves = getMoves(turn*-1, g);
 		if(moves.size()==0){
 			if(isPlayer1){
-				return getHeuristic1(g,turn);
+				return getHeuristic1(g,turn,depth);
 			}
 			else{
-				return getHeuristic2(g,turn);
+				return getHeuristic2(g,turn,depth);
 			}
 		}
 		Gameboard tempGame;
@@ -925,26 +963,35 @@ int Game::makeMove1(vector<vector<pair<int,int> > > moves, Gameboard g,double se
 
 	dur = 0;//(clock()-start)/(double) CLOCKS_PER_SEC;
 	vector<vector<pair<int,int> > > path;
-	int currDepth=0;
-	while(dur<(double)secs){
+	int currDepth=1;
+	int curHeur = MIN;
+	int maxHeur = MIN;
+	int maxMove = -1;
+	while(dur<(double)secs-.1){
 
 		// TEST
 		int NUM_DEPTH = currDepth;//2;//4;
 		//int NUM_DEPTH=currDepth;
-		if(NUM_DEPTH%2==0){
-			minimax(NUM_DEPTH,NUM_DEPTH,g,true,MIN,MAX,1,true,true,start,secs,path);
-		}
-		else{
-			minimax(NUM_DEPTH,NUM_DEPTH,g,true,MIN,MAX,1,false,true,start,secs,path);
-		}
+
+		curHeur = minimax(NUM_DEPTH,NUM_DEPTH,g,true,MIN,MAX,1,false,true,start,secs,path);
 
 		if(setGlobal){
+			if(curHeur!=maxHeur){
+				maxHeur=curHeur;
+				maxMove = GLOBAL_MOVE_1;
+			}
+		}
+		else{
+			setGlobal=true;
+		}
+
+		/*if(setGlobal){
 			moveNum = GLOBAL_MOVE_1;	
 		}
 		else{
 			setGlobal=true;
-			break;
-		}
+			//break;
+		}*/
 		
 		currDepth++;
 		dur = (double)(clock()-start)/(double) CLOCKS_PER_SEC;
@@ -953,10 +1000,12 @@ int Game::makeMove1(vector<vector<pair<int,int> > > moves, Gameboard g,double se
 		//break;
 	}
 	cout<<"Finished searching after: "<<dur<<" seconds and reached depth: "<<currDepth-1<<endl;
+	cout<<"Max heuristic was: "<<maxHeur<<" max move is: "<<maxMove<<endl;
 
 
 	//int moveNum = (rand()%moves.size());
 	//return 0;
+	return maxMove;
 	return moveNum;
 }
 
@@ -988,32 +1037,42 @@ int Game::makeMove2(vector<vector<pair<int,int> > > moves, Gameboard g, double s
 	dur = 0;//(clock()-start)/(double) CLOCKS_PER_SEC;
 
 	vector<vector<pair<int,int> > > path;
-	int currDepth=0;
-	while(dur<(double)secs){
+	int currDepth=1;
+	int curHeur=MIN;
+	int maxHeur=MIN;
+	int maxMove=-1;
+	while(dur<(double)secs-.1){
 		int NUM_DEPTH=currDepth;
-		if(NUM_DEPTH%2==0){
-			minimax(NUM_DEPTH,NUM_DEPTH,g,true,MIN,MAX,-1,true,false,start,secs,path);
-		}
-		else{
-			minimax(NUM_DEPTH,NUM_DEPTH,g,true,MIN,MAX,-1,false,false,start,secs,path);
-		}
+
+		curHeur = minimax(NUM_DEPTH,NUM_DEPTH,g,true,MIN,MAX,-1,false,false,start,secs,path);
 
 		if(setGlobal){
+			if(curHeur!=maxHeur){
+				maxHeur=curHeur;
+				maxMove = GLOBAL_MOVE_1;
+			}
+		}
+		else{
+			setGlobal=true;
+		}
+
+		/*if(setGlobal){
 			moveNum = GLOBAL_MOVE_1;
 		}
 		else{
 			setGlobal=true;
-			break;
-		}
+		}*/
 
 		currDepth++;
 		dur = (double)(clock()-start)/(double) CLOCKS_PER_SEC;
 	}
 	cout<<"Finished searching after: "<<dur<<" seconds and reached depth: "<<currDepth-1<<endl;
+	cout<<"Max heuristic was: "<<maxHeur<<" max move is: "<<maxMove<<endl;
 
 
 	//int moveNum = (rand()%moves.size());
 	//return 0;
+	return maxMove;
 	return moveNum;
 	
 }
@@ -1073,7 +1132,7 @@ void Game::compTurn(int turn,double secs){
 
 }
 
-void Game::executeGame(Gameboard g,int whoseTurn, int gameType, double timeLimit){
+void Game::executeGame(Gameboard g,int whoseTurn, int gameType, double timeLimit, int player){
 // gameType = 0: normal (1 comp vs 1 human)
 // gameType = 1: (1 comp vs 1 comp)
 // gameType = 2: (1 human vs 1 human)
@@ -1092,13 +1151,33 @@ void Game::executeGame(Gameboard g,int whoseTurn, int gameType, double timeLimit
 
 		switch(gameType){
 			case 0:
-				if(turn>0){
+				if(player==1){
+					turn*=-1;
+					// if(turn<0)
+					if(turn<0){
+						humanTurn(turn);
+					}
+					else{
+						compTurn(turn,timeLimit);
+					}
+				}
+				else{
+					if(turn>0){
+						humanTurn(turn);
+					}
+					else{
+						compTurn(turn,timeLimit);
+					}
+					turn*=-1;
+				}
+				/*turn*=-1;
+				// if(turn<0)
+				if(turn<0){
 					humanTurn(turn);
 				}
 				else{
 					compTurn(turn,timeLimit);
-				}
-				turn*=-1;
+				}*/
 				break;
 			case 1:
 				if(turn>0){
