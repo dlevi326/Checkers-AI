@@ -570,31 +570,50 @@ void Game::humanTurn(int turn){
 }
 
 int Game::getHeuristic1(Gameboard g, int turn,int depth){
-	return getHeuristic2(g,turn,depth);
+	//return getHeuristic2(g,turn,depth);
 	//turn*=-1;
+		//return getHeuristic(g,turn);
+	
 	string targets[2];
 	string enemies[2];
 
+	int back;
 	if(turn==1){
 		targets[0] = g.player1GameReg;
 		targets[1] = g.player1GameKing;
 		enemies[0] = g.player2GameReg;
 		enemies[1] = g.player2GameKing;
+		back=0;
 	} 
 	else{
 		targets[0] = g.player2GameReg;
 		targets[1] = g.player2GameKing;
 		enemies[0] = g.player1GameReg;
 		enemies[1] = g.player1GameKing;
+		back=7;
 	}
 
 	int numKings = 0;
 	int numReg = 0;
 	int enemyReg = 0;
 	int enemyKing = 0;
+	int numBack = 0;
+	int numSide=0;
+	int numMiddle=0;
+	int targGuard=0;
+	int enemyGuard=0;
 
 	for(int i=0;i<g.board.size();i++){
 		for(int j=0;j<g.board[i].size();j++){
+			if((g.board[i][j].type==targets[0] || g.board[i][j].type==targets[1]) && i==back){
+				numBack++;
+			}
+			if((g.board[i][j].type==targets[0] || g.board[i][j].type==targets[1]) && (j==0 || j==7)){
+				numSide++;
+			}
+			if((g.board[i][j].type==targets[0] || g.board[i][j].type==targets[1]) && ((i==3&&j==3)||(i==3&&j==4)||(i==4&&j==3)||(i==4&&j==4))){
+				numMiddle++;
+			}
 			if(g.board[i][j].type==targets[0]){
 				numReg++;
 			}
@@ -607,17 +626,58 @@ int Game::getHeuristic1(Gameboard g, int turn,int depth){
 			else if(g.board[i][j].type==enemies[1]){
 				enemyKing++;
 			}
+			
+			if(j!=0 && j!=7 && i!=0 && i!=7){
+				if(g.board[i][j].type==enemies[0] || g.board[i][j].type==enemies[1]){
+					if(g.board[i+1][j+1].type==enemies[0] || g.board[i+1][j+1].type==enemies[1]){
+						enemyGuard++;
+					}
+					if(g.board[i-1][j+1].type==enemies[0] || g.board[i-1][j+1].type==enemies[1]){
+						enemyGuard++;
+					}
+					if(g.board[i-1][j-1].type==enemies[0] || g.board[i-1][j-1].type==enemies[1]){
+						enemyGuard++;
+					}
+					if(g.board[i+1][j-1].type==enemies[0] || g.board[i+1][j-1].type==enemies[1]){
+						enemyGuard++;
+					}
+
+					if(g.board[i+1][j+1].type==targets[0] || g.board[i+1][j+1].type==targets[1]){
+						targGuard++;
+					}
+					if(g.board[i-1][j+1].type==targets[0] || g.board[i-1][j+1].type==targets[1]){
+						targGuard++;
+					}
+					if(g.board[i-1][j-1].type==targets[0] || g.board[i-1][j-1].type==targets[1]){
+						targGuard++;
+					}
+					if(g.board[i+1][j-1].type==targets[0] || g.board[i+1][j-1].type==targets[1]){
+						targGuard++;
+					}
+				}
+			}
 		}
 	}
 
+	int otherScore=0;
 	if(numReg+numKings==0){
-		return -100000;
+		otherScore-=10000;
 	}
 	if(enemyReg+enemyKing==0){
-		return 100000;
+		otherScore+=10000;
 	}
 
-	int heur = (1800*numKings)+(1000*numReg)-(1000*enemyReg)-(1800*enemyKing);
+	int valEnemyKing;
+	int valEnemyReg;
+	int valTargKing;
+	int valTargReg;
+	valEnemyKing = 500;//800;//1700;
+	valEnemyReg = 250;//500;//900;
+	valTargKing = 1500;
+	valTargReg = 1000;
+
+	int heur = (valTargKing*numKings)+(valTargReg*numReg)-(valEnemyReg*enemyReg)-(valEnemyKing*enemyKing)-depth+(10*numBack)+(2*numSide)+(10*numMiddle)-(2*enemyGuard)+(2*targGuard)+otherScore;
+	
 	/*cout<<"PRINTING BOARD"<<endl;
 	cout << "\033[1;31mPrinting Board\033[0m\n";
 	printBoard(g);
@@ -660,11 +720,19 @@ int Game::getHeuristic2(Gameboard g, int turn, int depth){
 	int enemyReg = 0;
 	int enemyKing = 0;
 	int numBack = 0;
+	int numSide=0;
+	int numMiddle=0;
 
 	for(int i=0;i<g.board.size();i++){
 		for(int j=0;j<g.board[i].size();j++){
 			if((g.board[i][j].type==targets[0] || g.board[i][j].type==targets[1]) && i==back){
 				numBack++;
+			}
+			if((g.board[i][j].type==targets[0] || g.board[i][j].type==targets[1]) && (j==0 || j==7)){
+				numSide++;
+			}
+			if((g.board[i][j].type==targets[0] || g.board[i][j].type==targets[1]) && ((i==3&&j==3)||(i==3&&j==4)||(i==4&&j==3)||(i==4&&j==4))){
+				numMiddle++;
 			}
 			if(g.board[i][j].type==targets[0]){
 				numReg++;
@@ -694,19 +762,19 @@ int Game::getHeuristic2(Gameboard g, int turn, int depth){
 	int valTargKing;
 	int valTargReg;
 	if(numKings+numReg>enemyReg+enemyKing){
-		valEnemyKing = 20;//800;//1900;
-		valEnemyReg = 10;//500;//1100;
-		valTargKing = 1000;
+		valEnemyKing = 500;//800;//1900;
+		valEnemyReg = 250;//500;//1100;
+		valTargKing = 1500;
 		valTargReg = 1000;
 	}
 	else{
-		valEnemyKing = 20;//800;//1700;
-		valEnemyReg = 10;//500;//900;
-		valTargKing = 1000;
+		valEnemyKing = 500;//800;//1700;
+		valEnemyReg = 250;//500;//900;
+		valTargKing = 1500;
 		valTargReg = 1000;
 	}
 
-	int heur = (valTargKing*numKings)+(valTargReg*numReg)-(valEnemyReg*enemyReg)-(valEnemyKing*enemyKing)-depth;//+(100*numBack)+otherScore;
+	int heur = (valTargKing*numKings)+(valTargReg*numReg)-(valEnemyReg*enemyReg)-(valEnemyKing*enemyKing)-depth+(10*numBack)+(2*numSide)+(10*numMiddle)+otherScore;
 	//cout<<"PRINTING BOARD"<<endl;
 	//cout << "\033[1;31mPrinting Board\033[0m\n";
 	//printBoard(g);
@@ -723,34 +791,44 @@ int Game::getHeuristic2(Gameboard g, int turn, int depth){
 }
 
 int Game::getHeuristic(Gameboard g, int turn, int depth){
-	//turn*=-1;
 	string targets[2];
 	string enemies[2];
 
+	int back;
 	if(turn==1){
 		targets[0] = g.player1GameReg;
 		targets[1] = g.player1GameKing;
 		enemies[0] = g.player2GameReg;
 		enemies[1] = g.player2GameKing;
+		back=0;
 	} 
 	else{
 		targets[0] = g.player2GameReg;
 		targets[1] = g.player2GameKing;
 		enemies[0] = g.player1GameReg;
 		enemies[1] = g.player1GameKing;
+		back=7;
 	}
-
-	// If turn=1, enemyReg=x
-	// If turn=-1, enemyReg=0
-	//cout<<"Turn: "<<turn<<" EnemyReg: "<<enemies[0]<<endl;
 
 	int numKings = 0;
 	int numReg = 0;
 	int enemyReg = 0;
 	int enemyKing = 0;
+	int numBack = 0;
+	int numSide=0;
+	int numMiddle=0;
 
 	for(int i=0;i<g.board.size();i++){
 		for(int j=0;j<g.board[i].size();j++){
+			if((g.board[i][j].type==targets[0] || g.board[i][j].type==targets[1]) && i==back){
+				numBack++;
+			}
+			if((g.board[i][j].type==targets[0] || g.board[i][j].type==targets[1]) && (j==0 || j==7)){
+				numSide++;
+			}
+			if((g.board[i][j].type==targets[0] || g.board[i][j].type==targets[1]) && ((i==3&&j==3)||(i==3&&j==4)||(i==4&&j==3)||(i==4&&j==4))){
+				numMiddle++;
+			}
 			if(g.board[i][j].type==targets[0]){
 				numReg++;
 			}
@@ -766,11 +844,36 @@ int Game::getHeuristic(Gameboard g, int turn, int depth){
 		}
 	}
 
-	int heur = (4*numKings)+(1*numReg)-(1*enemyReg)-(4*enemyKing);
-	/*cout<<"PRINTING BOARD"<<endl;
-	cout << "\033[1;31mPrinting Board\033[0m\n";
-	printBoard(g);
-	cout<<"HEURISTIC IS: "<<heur<<endl;
+	int otherScore=0;
+	if(numReg+numKings==0){
+		otherScore-=10000;
+	}
+	if(enemyReg+enemyKing==0){
+		otherScore+=10000;
+	}
+
+	int valEnemyKing;
+	int valEnemyReg;
+	int valTargKing;
+	int valTargReg;
+	if(numKings+numReg>enemyReg+enemyKing){
+		valEnemyKing = 500;//800;//1900;
+		valEnemyReg = 250;//500;//1100;
+		valTargKing = 1500;
+		valTargReg = 1000;
+	}
+	else{
+		valEnemyKing = 500;//800;//1700;
+		valEnemyReg = 250;//500;//900;
+		valTargKing = 1500;
+		valTargReg = 1000;
+	}
+
+	int heur = (valTargKing*numKings)+(valTargReg*numReg)-(valEnemyReg*enemyReg)-(valEnemyKing*enemyKing)-depth+(10*numBack)+(2*numSide)+(10*numMiddle)+otherScore;
+	//cout<<"PRINTING BOARD"<<endl;
+	//cout << "\033[1;31mPrinting Board\033[0m\n";
+	//printBoard(g);
+	/*cout<<"HEURISTIC IS: "<<heur<<endl;
 	cout<<"NUM OWN KINGS: "<<numKings<<endl;
 	cout<<"NUM OWN REG: "<<numReg<<endl;
 	cout<<"NUM ENEMY KINGS: "<<enemyKing<<endl;
