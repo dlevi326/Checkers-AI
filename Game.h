@@ -28,10 +28,10 @@ public:
 
 	int makeMove1(vector<vector<pair<int,int> > >, Gameboard,double);
 	int makeMove2(vector<vector<pair<int,int> > >, Gameboard,double);
-	int minimax(int,int,Gameboard,bool,int,int,int,bool,bool,double,double,vector<vector<pair<int,int> > >);
-	int getHeuristic(Gameboard,int,int);
-	int getHeuristic1(Gameboard,int,int);
-	int getHeuristic2(Gameboard,int,int);
+	double minimax(int,int,Gameboard,bool,int,int,int,bool,bool,double,double,vector<vector<pair<int,int> > >);
+	double getHeuristic(Gameboard,int,int);
+	double getHeuristic1(Gameboard,int,int);
+	double getHeuristic2(Gameboard,int,int);
 
 
 	void printBoard(Gameboard);
