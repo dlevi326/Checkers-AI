@@ -348,26 +348,43 @@ void Game::printBoard(Gameboard g){
 	cout<<endl;
 	cout<<"     ";
 	for(int i=0;i<8;i++){
-		cout<<"\033[1;30m"<<"("<<i<<")"<<"\033[0m";
+		cout<<"\033[1;30m"<<"   ("<<i<<")   "<<"\033[0m";
 	}
 	cout<<endl;
 	for(int i=0;i<g.board.size();i++){
-		cout<<"\033[1;30m("<<i<<")\033[0m  ";
-		for(int j=0;j<g.board.size();j++){
-			if(g.board[i][j].type==g.player1GameReg||g.board[i][j].type==g.player1GameKing){
-				cout<<"\033[7;31m";
+		//cout<<endl;
+		
+		for(int k=0;k<3;k++){
+			if(k!=1) cout<<"     ";
+			if(k==1) cout<<"\033[1;30m("<<i<<")\033[0m  ";
+			for(int j=0;j<g.board.size();j++){
+				for(int m=0;m<3;m++){
+					if(g.board[i][j].type==g.player1GameReg||g.board[i][j].type==g.player1GameKing){
+						cout<<"\033[7;31m";
+					}
+					else if(g.board[i][j].type==g.player2GameReg||g.board[i][j].type==g.player2GameKing){
+						cout<<"\033[7;30m";
+					}
+					else if(g.board[i][j].type==g.blankGame){
+						if((i%2==0 && j%2==1) || (i%2==1 && j%2==0)){
+							//cout<<"\033[7;36m";
+							cout<<"\033[7;36m";
+						}
+						else{
+							cout<<"\033[7;37m";
+						}
+					}
+					cout<<g.board[i][j].type;
+					cout<<"\033[0m";
+				}
+				
 			}
-			else if(g.board[i][j].type==g.player2GameReg||g.board[i][j].type==g.player2GameKing){
-				cout<<"\033[7;30m";
-			}
-			else if(g.board[i][j].type==g.blankGame){
-				cout<<"\033[7;36m";
-			}
-			cout<<g.board[i][j].type;
-			cout<<"\033[0m";
+			cout<<endl;
 		}
-		cout<<endl;
+		//cout<<endl;
+		//cout<<endl;
 	}
+	
 	for(int i=0;i<35;i++){
 		cout<<"-";
 	}
@@ -966,7 +983,7 @@ double Game::minimax(int depth,int maxDepth, Gameboard g, bool maxPlayer, int al
 
 	int correctInd=-1;
 
-	double dur = (double)(clock()-start)/(double) CLOCKS_PER_SEC;
+	double dur = (double)(time(NULL)-start);///(double) CLOCKS_PER_SEC;
 	if(dur>=(timeLimit-.1)){
 		//cout<<"Breaking in middle of minimax!!!"<<endl;
 		//cout<<"Dur is: "<<dur<<" with a timeLimit of: "<<timeLimit<<endl;
@@ -1113,9 +1130,12 @@ int Game::makeMove1(vector<vector<pair<int,int> > > moves, Gameboard g,double se
 
 	//currBoard.board = makeMove(currBoard, allMoves[moveNum]);
 
-	clock_t start;
+	time_t start = time(NULL);
+	//time(&start);
+
+	//clock_t start;
 	double dur;
-	start = clock();
+	//start = clock();
 
 	dur = 0;//(clock()-start)/(double) CLOCKS_PER_SEC;
 	vector<vector<pair<int,int> > > path;
@@ -1149,8 +1169,7 @@ int Game::makeMove1(vector<vector<pair<int,int> > > moves, Gameboard g,double se
 		}*/
 		
 		currDepth++;
-		dur = (double)(clock()-start)/(double) CLOCKS_PER_SEC;
-
+		dur = (double)(time(NULL)-start);///(double) CLOCKS_PER_SEC;
 		// TEST
 		//break;
 	}
@@ -1185,9 +1204,10 @@ int Game::makeMove2(vector<vector<pair<int,int> > > moves, Gameboard g, double s
 
 	//currBoard.board = makeMove(currBoard, allMoves[moveNum]);
 
-	clock_t start;
+	//clock_t start;
+	time_t start = time(NULL);
 	double dur;
-	start = clock();
+	//start = clock();
 
 	dur = 0;//(clock()-start)/(double) CLOCKS_PER_SEC;
 
@@ -1218,7 +1238,7 @@ int Game::makeMove2(vector<vector<pair<int,int> > > moves, Gameboard g, double s
 		}*/
 
 		currDepth++;
-		dur = (double)(clock()-start)/(double) CLOCKS_PER_SEC;
+		dur = (double)(time(NULL)-start);///(double) CLOCKS_PER_SEC;
 	}
 	cout<<"Finished searching after: "<<dur<<" seconds and reached depth: "<<currDepth-1<<endl;
 	cout<<"Max heuristic was: "<<maxHeur<<" max move is: "<<maxMove<<endl;
