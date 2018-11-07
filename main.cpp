@@ -150,8 +150,8 @@ int main(){
 	int player;
 	if(mode==0){
 		cout<<"What player would you like to be?"<<endl;
-		cout<<"(0) Player1"<<endl;
-		cout<<"(1) Player2 (Recommended)"<<endl;
+		cout<<"(0) Player1 [Red]"<<endl;
+		cout<<"(1) Player2 [Black] (Recommended)"<<endl;
 		cout<<"Please make selection: ";
 
 		player = -1;
@@ -173,7 +173,7 @@ int main(){
 		}
 	}
 	else{
-		boardFile = "pracBoards/mainBoard.txt";
+		boardFile = "pracBoards/sableBoards/sableMainBoard.txt";
 	}
 
 	cout<<"Finally please input time limit in seconds: ";

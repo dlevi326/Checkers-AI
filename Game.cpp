@@ -721,52 +721,108 @@ double Game::getHeuristic2(Gameboard g, int turn, int depth){
 	string targets[2];
 	string enemies[2];
 
-	int back;
+	int backTarg;
+	int backEnemy;
 	if(turn==1){
 		targets[0] = g.player1GameReg;
 		targets[1] = g.player1GameKing;
 		enemies[0] = g.player2GameReg;
 		enemies[1] = g.player2GameKing;
-		back=0;
+		backTarg=0;
+		backEnemy=7;
 	} 
 	else{
 		targets[0] = g.player2GameReg;
 		targets[1] = g.player2GameKing;
 		enemies[0] = g.player1GameReg;
 		enemies[1] = g.player1GameKing;
-		back=7;
+		backTarg=7;
+		backEnemy=0;
 	}
 
 	int numKings = 0;
 	int numReg = 0;
 	int enemyReg = 0;
 	int enemyKing = 0;
-	int numBack = 0;
-	int numSide=0;
-	int numMiddle=0;
+	int numBackTarg = 0;
+	int numBackEnemy = 0;
+	int numSideTarg=0;
+	int numSideEnemy=0;
+	int numMiddleTarg=0;
+	int numMiddleEnemy=0;
+	int targGuard=0;
+	int enemyGuard=0;
+
+	vector<pair<int,int> > enemyCoords;
+	vector<pair<int,int> > targCoords;
 
 	for(int i=0;i<g.board.size();i++){
 		for(int j=0;j<g.board[i].size();j++){
-			if((g.board[i][j].type==targets[0] || g.board[i][j].type==targets[1]) && i==back){
-				numBack++;
+			if((g.board[i][j].type==targets[0] || g.board[i][j].type==targets[1]) && i==backTarg){
+				numBackTarg++;
 			}
 			if((g.board[i][j].type==targets[0] || g.board[i][j].type==targets[1]) && (j==0 || j==7)){
-				numSide++;
+				numSideTarg++;
 			}
 			if((g.board[i][j].type==targets[0] || g.board[i][j].type==targets[1]) && ((i==3&&j==3)||(i==3&&j==4)||(i==4&&j==3)||(i==4&&j==4))){
-				numMiddle++;
+				numMiddleTarg++;
 			}
+
+			if((g.board[i][j].type==enemies[0] || g.board[i][j].type==enemies[1]) && i==backEnemy){
+				numBackTarg++;
+			}
+			if((g.board[i][j].type==enemies[0] || g.board[i][j].type==enemies[1]) && (j==0 || j==7)){
+				numSideTarg++;
+			}
+			if((g.board[i][j].type==enemies[0] || g.board[i][j].type==enemies[1]) && ((i==3&&j==3)||(i==3&&j==4)||(i==4&&j==3)||(i==4&&j==4))){
+				numMiddleTarg++;
+			}
+			
 			if(g.board[i][j].type==targets[0]){
+				targCoords.push_back(make_pair(i,j));
 				numReg++;
 			}
 			else if(g.board[i][j].type==targets[1]){
+				targCoords.push_back(make_pair(i,j));
 				numKings++;
 			}
 			else if(g.board[i][j].type==enemies[0]){
+				enemyCoords.push_back(make_pair(i,j));
 				enemyReg++;
 			}
 			else if(g.board[i][j].type==enemies[1]){
+				enemyCoords.push_back(make_pair(i,j));
 				enemyKing++;
+			}
+			
+			if(j!=0 && j!=7 && i!=0 && i!=7){
+				if(g.board[i][j].type==enemies[0] || g.board[i][j].type==enemies[1]){
+					if(g.board[i+1][j+1].type==enemies[0] || g.board[i+1][j+1].type==enemies[1]){
+						enemyGuard++;
+					}
+					if(g.board[i-1][j+1].type==enemies[0] || g.board[i-1][j+1].type==enemies[1]){
+						enemyGuard++;
+					}
+					if(g.board[i-1][j-1].type==enemies[0] || g.board[i-1][j-1].type==enemies[1]){
+						enemyGuard++;
+					}
+					if(g.board[i+1][j-1].type==enemies[0] || g.board[i+1][j-1].type==enemies[1]){
+						enemyGuard++;
+					}
+
+					if(g.board[i+1][j+1].type==targets[0] || g.board[i+1][j+1].type==targets[1]){
+						targGuard++;
+					}
+					if(g.board[i-1][j+1].type==targets[0] || g.board[i-1][j+1].type==targets[1]){
+						targGuard++;
+					}
+					if(g.board[i-1][j-1].type==targets[0] || g.board[i-1][j-1].type==targets[1]){
+						targGuard++;
+					}
+					if(g.board[i+1][j-1].type==targets[0] || g.board[i+1][j-1].type==targets[1]){
+						targGuard++;
+					}
+				}
 			}
 		}
 	}
@@ -779,28 +835,51 @@ double Game::getHeuristic2(Gameboard g, int turn, int depth){
 		otherScore+=10000;
 	}
 
+	double endGameScore = 0;
+
+	if(targCoords.size()+enemyCoords.size()<=6){
+		double targX = 0;
+		double targY = 0;
+		double enemyX = 0;
+		double enemyY = 0;
+		for(int i=0;i<targCoords.size();i++){
+			targX+=targCoords[i].first;
+			targY+=targCoords[i].second;
+		}
+
+		for(int i=0;i<enemyCoords.size();i++){
+			enemyX+=enemyCoords[i].first;
+			enemyY+=enemyCoords[i].second;
+		}
+		targX/=targCoords.size();
+		targY/=targCoords.size();
+		enemyX/=targCoords.size();
+		enemyY/=targCoords.size();
+
+		endGameScore = sqrt(pow(enemyX-targX,2)+pow(enemyY-targY,2));
+	}
+	//cout<<endGameScore<<endl;
+
 	int valEnemyKing;
 	int valEnemyReg;
 	int valTargKing;
 	int valTargReg;
-	if(numKings+numReg>enemyReg+enemyKing){
-		valEnemyKing = 500;//800;//1900;
-		valEnemyReg = 250;//500;//1100;
-		valTargKing = 1500;
-		valTargReg = 1000;
-	}
-	else{
-		valEnemyKing = 500;//800;//1700;
-		valEnemyReg = 250;//500;//900;
-		valTargKing = 1500;
-		valTargReg = 1000;
-	}
+	valEnemyKing = 1500;//800;//1700;
+	valEnemyReg = 1000;//500;//900;
+	valTargKing = 1500;
+	valTargReg = 1000;
 
-	double heur = (valTargKing*numKings)+(valTargReg*numReg)-(valEnemyReg*enemyReg)-(valEnemyKing*enemyKing)-depth+(10*numBack)+(2*numSide)+(10*numMiddle)+otherScore;
-	//cout<<"PRINTING BOARD"<<endl;
-	//cout << "\033[1;31mPrinting Board\033[0m\n";
-	//printBoard(g);
-	/*cout<<"HEURISTIC IS: "<<heur<<endl;
+	double heur = (valTargKing*numKings)+(valTargReg*numReg)-(valEnemyReg*enemyReg)-(valEnemyKing*enemyKing)-depth+(10*numBackTarg)+(.1*numSideTarg)+(10*numMiddleTarg)-(10*numBackEnemy)-(.1*numSideEnemy)-(10*numMiddleEnemy)-(2*enemyGuard)+(2*targGuard)+otherScore-endGameScore;
+	
+	//cout<<"HEURISTIC: "<<heur<<endl;
+	//cout<<"----------------"<<endl;
+	//cout<<"NUM SIDE: "<<numSide<<endl;
+	//cout<<"NUM MIDDLE: "<<numMiddle<<endl;
+	//cout<<"NUM ENEMY GUARD: "<<enemyGuard<<endl;
+	/*cout<<"PRINTING BOARD"<<endl;
+	cout << "\033[1;31mPrinting Board\033[0m\n";
+	printBoard(g);
+	cout<<"HEURISTIC IS: "<<heur<<endl;
 	cout<<"NUM OWN KINGS: "<<numKings<<endl;
 	cout<<"NUM OWN REG: "<<numReg<<endl;
 	cout<<"NUM ENEMY KINGS: "<<enemyKing<<endl;
@@ -813,7 +892,7 @@ double Game::getHeuristic2(Gameboard g, int turn, int depth){
 }
 
 double Game::getHeuristic(Gameboard g, int turn, int depth){
-
+	
 	string targets[2];
 	string enemies[2];
 
@@ -1174,7 +1253,7 @@ int Game::makeMove1(vector<vector<pair<int,int> > > moves, Gameboard g,double se
 		//break;
 	}
 	cout<<"Finished searching after: "<<dur<<" seconds and reached depth: "<<currDepth-1<<endl;
-	cout<<"Max heuristic was: "<<maxHeur<<" max move is: "<<maxMove<<endl;
+	//cout<<"Max heuristic was: "<<maxHeur<<" max move is: "<<maxMove<<endl;
 
 
 	//int moveNum = (rand()%moves.size());
