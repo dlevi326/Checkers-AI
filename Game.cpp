@@ -677,6 +677,10 @@ double Game::getHeuristic1(Gameboard g, int turn,int depth){
 	}
 
 	int otherScore=0;
+	int numRegTotal=numReg+numKings;
+	int numEnemyTotal=enemyReg+enemyKing;
+	double ratioTarget = (double)numRegTotal/(double)numEnemyTotal;
+	double ratioEnemy = (double)numEnemyTotal/(double)numRegTotal;
 	if(numReg+numKings==0){
 		otherScore-=10000;
 	}
@@ -688,10 +692,10 @@ double Game::getHeuristic1(Gameboard g, int turn,int depth){
 	int valEnemyReg;
 	int valTargKing;
 	int valTargReg;
-	valEnemyKing = 1500;//800;//1700;
-	valEnemyReg = 1000;//500;//900;
-	valTargKing = 1500;
-	valTargReg = 1000;
+	valEnemyKing = 1500*ratioEnemy;//800;//1700;
+	valEnemyReg = 1000*ratioEnemy;//500;//900;
+	valTargKing = 1500*ratioTarget;
+	valTargReg = 1000*ratioTarget;
 
 	double heur = (valTargKing*numKings)+(valTargReg*numReg)-(valEnemyReg*enemyReg)-(valEnemyKing*enemyKing)-depth+(10*numBack)+(.1*numSide)+(10*numMiddle)-(2*enemyGuard)+(2*targGuard)+otherScore;
 	
