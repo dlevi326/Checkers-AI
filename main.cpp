@@ -137,8 +137,8 @@ int main(){
 	}
 	else{
 		cout<<"Who would you like to start:"<<endl;
-		cout<<"(0) player1 Start"<<endl;
-		cout<<"(1) player2 start"<<endl;
+		cout<<"(0) player2 [Red] Start"<<endl;
+		cout<<"(1) player1 [Black] start"<<endl;
 		cout<<"Please make selection: ";
 
 		turn = -1;
@@ -149,9 +149,9 @@ int main(){
 
 	int player;
 	if(mode==0){
-		cout<<"What player would you like to be?"<<endl;
-		cout<<"(0) Player1 [Red]"<<endl;
-		cout<<"(1) Player2 [Black] (Recommended)"<<endl;
+		cout<<"What player would you like the human to be?"<<endl;
+		cout<<"(0) Player2 [Red]"<<endl;
+		cout<<"(1) Player1 [Black] (Recommended)"<<endl;
 		cout<<"Please make selection: ";
 
 		player = -1;
