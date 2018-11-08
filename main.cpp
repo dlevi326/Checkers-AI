@@ -173,10 +173,10 @@ int main(){
 		}
 	}
 	else{
-		boardFile = "pracBoards/sableBoards/sableMainBoard.txt";
+		boardFile = "pracBoards/sableMainBoard.txt";
 	}
 
-	cout<<"Finally please input time limit in seconds: ";
+	cout<<"Finally please input time limit in seconds (preferably more than 3 seconds): ";
 	double limit = -1;
 	while(limit<0){
 		limit = makeChoiceTime();

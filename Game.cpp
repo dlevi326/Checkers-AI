@@ -1324,7 +1324,7 @@ int Game::makeMove2(vector<vector<pair<int,int> > > moves, Gameboard g, double s
 		dur = (double)(time(NULL)-start);///(double) CLOCKS_PER_SEC;
 	}
 	cout<<"Finished searching after: "<<dur<<" seconds and reached depth: "<<currDepth-1<<endl;
-	cout<<"Max heuristic was: "<<maxHeur<<" max move is: "<<maxMove<<endl;
+	//cout<<"Max heuristic was: "<<maxHeur<<" max move is: "<<maxMove<<endl;
 
 
 	//int moveNum = (rand()%moves.size());
@@ -1440,12 +1440,12 @@ void Game::executeGame(Gameboard g,int whoseTurn, int gameType, double timeLimit
 				if(turn>0){
 					compTurn(turn,timeLimit);
 					//sleep(.5);
-					usleep(200000);
+					//usleep(200000);
 				}
 				else{
 					compTurn(turn,timeLimit);
 					//sleep(.5);
-					usleep(200000);
+					//usleep(200000);
 				}
 				turn*=-1;
 				break;
